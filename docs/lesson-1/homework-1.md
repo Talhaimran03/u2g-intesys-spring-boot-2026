@@ -4,9 +4,8 @@
 
 * Implement **POST /projects** to add a project to the in-memory list.
 * Implement **GET /projects/{id}** to fetch a single project.
-* Optional: practice DI with `UserService` and `GET /user/{id}`.
+* Add User entity with, "id", "name", "surname" and practice DI with `UserService` and `GET /user/{id}`.
 * Extend `Project` with a `description` field.
-* Optional: add `Task` with nested endpoint `/projects/{id}/tasks`.
 
 ### **Example POST Request**
 
