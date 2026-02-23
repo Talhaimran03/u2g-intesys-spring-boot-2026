@@ -24,6 +24,8 @@ public class ProjectController {
         return projectService.getAllProjects();
     }
 
+    @GetMapping("/{id}")
+    public Project getProjectById(@PathVariable Long id) {return projectService.getProjectById(id);}
     @PostMapping
     public List<Project> createProject(@RequestBody Project project) {
         projectList.add(project);
@@ -35,4 +37,9 @@ public class ProjectController {
         projectList.clear();
         return new ArrayList<>(projectList);
     }
+    @GetMapping("/test")
+    public String test() {
+        return "Controller OK";
+    }
+
 }

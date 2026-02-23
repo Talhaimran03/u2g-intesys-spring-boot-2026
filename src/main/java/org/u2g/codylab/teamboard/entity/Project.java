@@ -6,7 +6,7 @@ public class Project {
     private String description;
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
