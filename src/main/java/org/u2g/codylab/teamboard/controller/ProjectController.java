@@ -29,4 +29,10 @@ public class ProjectController {
         projectList.add(project);
         return new ArrayList<>(projectList);
     }
+
+    @DeleteMapping
+    public List<Project> deleteProjects() {
+        projectList.clear();
+        return new ArrayList<>(projectList);
+    }
 }
