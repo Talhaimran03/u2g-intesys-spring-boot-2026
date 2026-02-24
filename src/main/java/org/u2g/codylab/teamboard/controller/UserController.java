@@ -1,30 +1,34 @@
 package org.u2g.codylab.teamboard.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.u2g.codylab.teamboard.entity.LoginRequest;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.service.UserService;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/users")
-
+@RequestMapping("/user")
 public class UserController {
-    List<User> users;
-
-    private  final UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {return  userService.getUserById(id);}
-
-    @GetMapping
-    public List<User> getAllUsers() {return  userService.getAllUsers();}
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        userService.register(user);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        this.userService.login(loginRequest);
+        return ResponseEntity.ok().build();
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        userService.deleteuser(id);
+        return ResponseEntity.noContent().build();
+    }
 }
+

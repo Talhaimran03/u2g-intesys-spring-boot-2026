@@ -1,3 +1,11 @@
 spring:
   application:
     name: teamboard
+  datasource:
+    url: jdbc:postgresql://localhost:5432/teamboard
+    username: admin
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

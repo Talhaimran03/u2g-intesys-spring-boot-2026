@@ -11,8 +11,6 @@ import java.util.ArrayList;
 @RequestMapping("/projects")
 public class ProjectController {
 
-    List<Project> projectList = new ArrayList<>();
-
     private final ProjectService projectService;
 
     public ProjectController(ProjectService projectService) {
@@ -28,18 +26,12 @@ public class ProjectController {
     public Project getProjectById(@PathVariable Long id) {return projectService.getProjectById(id);}
     @PostMapping
     public List<Project> createProject(@RequestBody Project project) {
-        projectList.add(project);
-        return new ArrayList<>(projectList);
+        return projectService.addProject(project);
     }
 
     @DeleteMapping
     public List<Project> deleteProjects() {
-        projectList.clear();
-        return new ArrayList<>(projectList);
-    }
-    @GetMapping("/test")
-    public String test() {
-        return "Controller OK";
+        return projectService.deleteProjects();
     }
 
 }
