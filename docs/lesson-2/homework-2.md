@@ -5,6 +5,9 @@
 
 ### Mandatory:
 
+Homework for Dassi and Joel is to configure Docker
+
+For the others is the following:
 * In POST `/register` return:
     * 409 if username already exists
 
