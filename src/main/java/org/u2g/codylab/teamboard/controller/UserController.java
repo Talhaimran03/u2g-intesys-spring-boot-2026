@@ -1,5 +1,6 @@
-package org.u2g.codylab.teamboard;
+package org.u2g.codylab.teamboard.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.service.UserService;
@@ -13,8 +14,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        userService.register(user);
+        return ResponseEntity.ok().build();
     }
 }
