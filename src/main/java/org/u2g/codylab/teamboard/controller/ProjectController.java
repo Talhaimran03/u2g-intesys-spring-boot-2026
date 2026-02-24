@@ -1,6 +1,8 @@
 package org.u2g.codylab.teamboard.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.service.ProjectService;
 
@@ -22,6 +24,16 @@ public class ProjectController {
     @GetMapping
     public List<Project> getAllProjects() {
         return projectService.getAllProjects();
+    }
+
+    @GetMapping("/{id}")
+    public Project getOneProject(@PathVariable Long id) throws ResponseStatusException  {
+        Project project = projectService.getOneProjects(id);
+        if(project==null){
+//            throw new RuntimeException("Project not found with id:" +id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found");
+        }
+        return project;
     }
 
     @PostMapping
