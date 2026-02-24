@@ -2,6 +2,7 @@ package org.u2g.codylab.teamboard.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.u2g.codylab.teamboard.entity.LoginRequest;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.service.UserService;
 
@@ -19,4 +20,10 @@ public class UserController {
         userService.register(user);
         return ResponseEntity.ok().build();
     }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        this.userService.login(loginRequest);
+        return ResponseEntity.ok().build();
+    }
 }
+
