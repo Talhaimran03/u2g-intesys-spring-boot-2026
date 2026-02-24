@@ -8,19 +8,13 @@
 * In POST `/register` return:
     * 409 if username already exists
 
-* Extend `openapi.yaml` to include:
-    * PUT `/user/{id}` to update user
-    * DELETE `/user/{id}` to delete user
-
-* Implement `PUT /user/{id}`
-* Implement `DELETE /user/{id}`
+* Implement `DELETE /user/{id}` to delete user
 
 ---
 
 ### Expected Behaviors
 
 * Duplicate username → 409
-* Login with wrong password → 401
 * You can update the user data and delete it (to do that, the request must be authenticated with the correct credentials)
 
 ---
