@@ -142,6 +142,32 @@ paths:
         '404':
           description: Project not found
 
+  /logout:
+    post:
+      summary: Logout user
+      tags: [ User ]
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+
+  /me:
+    get:
+      summary: Get current user info from JWT token
+      tags: [ User ]
+      operationId: me
+      responses:
+        '200':
+          description: User info returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+        '401':
+          description: Missing or invalid token
 components:
   schemas:
     User:
