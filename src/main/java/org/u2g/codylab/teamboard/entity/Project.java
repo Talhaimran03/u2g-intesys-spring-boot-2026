@@ -21,7 +21,7 @@ public class Project {
     private User owner;
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
