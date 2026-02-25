@@ -7,9 +7,12 @@
 
 * Protect `GET /user/{id}`
 * Implement `POST /logout`
-* Return custom 401 JSON response
-* Add JWT security in OpenAPI properly
-* Regenerate and implement interfaces
+
+## **Extra Challenge **
+
+* Add token expiration handling
+* Extract username from token and return it in `/me` endpoint
+
 
 ---
 
@@ -41,10 +44,3 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 * Access with valid token → 200
 
 ---
-
-## **Extra Challenge ⭐**
-
-* Add token expiration handling
-* Add refresh token endpoint
-* Extract username from token and return it in `/me` endpoint
-* Centralized Exception Handling (`@ControllerAdvice`)
