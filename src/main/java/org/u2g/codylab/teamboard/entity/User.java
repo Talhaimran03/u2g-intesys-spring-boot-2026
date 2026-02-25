@@ -1,9 +1,29 @@
 package org.u2g.codylab.teamboard.entity;
 
-public class User {
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String surname;
+    private String email;
+
+    @Column(unique = true)
+    private String username;
+    private String password;
+
+
+    public User() {}
+
+    public User(Long id, String name, String surname) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+    }
 
     public Long getId() {
         return id;
@@ -29,15 +49,27 @@ public class User {
         this.surname = surname;
     }
 
-    private String surname;
+    public String getEmail() {
+        return email;
+    }
 
-    public User(long id,String name, String surname){
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
-
-
-
-

@@ -1,41 +1,51 @@
 package org.u2g.codylab.teamboard.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.u2g.codylab.teamboard.api.UserApi;
+import org.u2g.codylab.teamboard.dto.Login200ResponseApiDTO;
+import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.UserApiDTO;
+import org.u2g.codylab.teamboard.entity.LoginRequest;
 import org.u2g.codylab.teamboard.entity.User;
-import org.u2g.codylab.teamboard.service.ProjectService;
+import org.u2g.codylab.teamboard.service.JwtService;
 import org.u2g.codylab.teamboard.service.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
-@RequestMapping("/users")
-public class UserController {
+public class UserController implements UserApi {
+    private final UserService userService;
+    private final JwtService jwtService;
 
-    List<User> usersList = new ArrayList<>();
-   private final UserService userService;
-     public UserController(UserService userService) {
-         this.userService = userService;
-     }
+    public UserController(UserService userService, JwtService jwtService) {
+        this.userService = userService;
+        this.jwtService = jwtService;
+    }
 
-     @GetMapping
-    public List<User> getUsers(){
-         return userService.getAllUsers();
-     }
-     @GetMapping("/{id}")
-    public User getOneUser(@PathVariable Long id) throws ResponseStatusException {
-        User user = userService.getOneUser(id);
-        if(user == null){
-            throw new  ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+    @Override
+    public ResponseEntity<Login200ResponseApiDTO> login(LoginRequestApiDTO loginRequestApiDTO) {
+        return userService.login(loginRequestApiDTO)
+                .map(u ->{
+                    String token = jwtService.generateToken(loginRequestApiDTO.getUsername());
+                    Login200ResponseApiDTO response = new Login200ResponseApiDTO();
+                    response.setToken(token);
+                    return ResponseEntity.ok(response);
+                }).orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @Override
+    public ResponseEntity<Void> register(UserApiDTO userApiDTO) {
+        return userService.register(userApiDTO);
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteUserById(Long id) {
+        boolean deleted = userService.deleteUserById(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return user;
-     }
+    }
+}
 
-     @PostMapping
-    public List<User> createUser(@RequestBody User user) {
-         usersList.add(user);
-         return new ArrayList<>(usersList);
-     }
- }
