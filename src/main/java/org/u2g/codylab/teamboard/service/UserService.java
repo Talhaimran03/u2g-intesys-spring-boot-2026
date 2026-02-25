@@ -1,5 +1,6 @@
 package org.u2g.codylab.teamboard.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.u2g.codylab.teamboard.entity.LoginRequest;
@@ -19,14 +20,15 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void register(User user) {
+    public ResponseEntity<?> register(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists!");
+            return ResponseEntity.status(409).body("Username already exists");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
         userRepository.save(user);
+
+        return ResponseEntity.ok().build();
     }
     public  Optional<User> login(LoginRequest loginRequest) {
        Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
@@ -34,5 +36,13 @@ public class UserService {
             return userOpt;
         }
         return Optional.empty();
+    }
+
+    public boolean deleteUserById(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
