@@ -81,12 +81,4 @@ public class ProjectService {
         String username = authentication.getName();
         return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username: " + username));
     }
-    public Project getProjectById(Long id) {
-        return getAllProjects()
-                .stream()
-                .filter(project -> project.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-
-    }
 }
