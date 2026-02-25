@@ -7,19 +7,27 @@ import org.u2g.codylab.teamboard.api.UserApi;
 import org.u2g.codylab.teamboard.dto.Login200ResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.UserApiDTO;
-import org.u2g.codylab.teamboard.entity.LoginRequest;
-import org.u2g.codylab.teamboard.entity.User;
+import org.u2g.codylab.teamboard.mapper.UserMapper;
 import org.u2g.codylab.teamboard.service.JwtService;
+import org.u2g.codylab.teamboard.service.TokenBlacklistService;
 import org.u2g.codylab.teamboard.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 public class UserController implements UserApi {
     private final UserService userService;
     private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final UserMapper userMapper;  // ← AJOUTÉ
 
-    public UserController(UserService userService, JwtService jwtService) {
+    public UserController(UserService userService,
+                          JwtService jwtService,
+                          TokenBlacklistService tokenBlacklistService,
+                          UserMapper userMapper) {  // ← AJOUTÉ
         this.userService = userService;
         this.jwtService = jwtService;
+        this.tokenBlacklistService = tokenBlacklistService;
+        this.userMapper = userMapper;  // ← AJOUTÉ
     }
 
     @Override
@@ -46,6 +54,32 @@ public class UserController implements UserApi {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @Override
+    public ResponseEntity<UserApiDTO> getUserById(Long id) {
+        return userService.getUserById(id)
+                .map(user -> ResponseEntity.ok(userMapper.toApiDTO(user)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @PostMapping("/user/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        tokenBlacklistService.blacklist(authHeader.substring(7));
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/user/me")
+    public ResponseEntity<String> me(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(jwtService.extractUsername(authHeader.substring(7)));
     }
 }
 
