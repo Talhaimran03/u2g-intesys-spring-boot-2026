@@ -4,26 +4,33 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.api.UserApi;
+import org.u2g.codylab.teamboard.dto.Login200ResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.UserApiDTO;
 import org.u2g.codylab.teamboard.entity.LoginRequest;
 import org.u2g.codylab.teamboard.entity.User;
+import org.u2g.codylab.teamboard.service.JwtService;
 import org.u2g.codylab.teamboard.service.UserService;
 
 @RestController
 public class UserController implements UserApi {
     private final UserService userService;
+    private final JwtService jwtService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtService jwtService) {
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     @Override
-    public ResponseEntity<Void> login(LoginRequestApiDTO loginRequestApiDTO) {
-        if (userService.login(loginRequestApiDTO).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Login200ResponseApiDTO> login(LoginRequestApiDTO loginRequestApiDTO) {
+        return userService.login(loginRequestApiDTO)
+                .map(u ->{
+                    String token = jwtService.generateToken(loginRequestApiDTO.getUsername());
+                    Login200ResponseApiDTO response = new Login200ResponseApiDTO();
+                    response.setToken(token);
+                    return ResponseEntity.ok(response);
+                }).orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @Override

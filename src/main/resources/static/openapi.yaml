@@ -3,10 +3,14 @@ info:
   title: TeamBoard API
   version: 1.0.0
 
+security:
+  - bearerAuth: []
+
 paths:
 
   /user/register:
     post:
+      security: []
       summary: Register a new user
       tags: [ User ]
       operationId: register
@@ -18,10 +22,15 @@ paths:
               $ref: '#/components/schemas/User'
       responses:
         '200':
-          description: User registered successfully
+          description: Registration successful
+        '400':
+          description: Username or password missing
+        '409':
+          description: Username already exists
 
   /user/login:
     post:
+      security: []
       summary: Login user
       tags: [ User ]
       operationId: login
@@ -34,6 +43,17 @@ paths:
       responses:
         '200':
           description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          description: Username or password missing
+        '401':
+          description: Invalid credentials
 
   /user/{id}:
     delete:
@@ -84,6 +104,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Project'
+        '400':
+          description: Invalid project details
     delete:
       summary: Delete all projects
       tags: [Project]
@@ -147,7 +169,7 @@ components:
         id:
           type: integer
           format: int64
-        name:
+        title:
           type: string
         description:
           type: string
