@@ -43,9 +43,9 @@ public class ProjectService {
         return project == null ? null : projectMapper.toApiDTO(project);
     }
 
-    public Project getOneProjects(long id){
-        List<Project> projects = getAllProjects();
-        Optional<Project> project = projects.stream().filter(p -> p.getId() == id).findFirst();
-        return project.orElse(null);
-    }
+//    public Project getOneProjects(long id){
+//        List<Project> projects = getAllProjects();
+//        Optional<Project> project = projects.stream().filter(p -> p.getId() == id).findFirst();
+//        return project.orElse(null);
+//    }
 }
