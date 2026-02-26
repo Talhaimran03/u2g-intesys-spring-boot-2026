@@ -2,7 +2,6 @@ package org.u2g.codylab.teamboard.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,10 +33,14 @@ public class JwtService {
     public boolean validateToken(String token) {
         try {
             Claims claims = getClaims(token);
-            return claims.getExpiration().after(new Date());
+            return !isTokenExpired(claims);
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
     }
 
     private Claims getClaims(String token) {
@@ -47,4 +50,3 @@ public class JwtService {
                 .getBody();
     }
 }
-

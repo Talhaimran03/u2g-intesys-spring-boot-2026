@@ -1,16 +1,17 @@
 package org.u2g.codylab.teamboard.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import org.u2g.codylab.teamboard.dto.ProjectApiDTO;
-import org.u2g.codylab.teamboard.dto.UserApiDTO;
+import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;
-import org.u2g.codylab.teamboard.entity.User;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProjectMapper {
 
-    ProjectApiDTO toApiDTO(Project project);
+    @Mapping(target = "ownerUsername", source = "owner.username")
+    ProjectResponseApiDTO toApiDTO(Project project);
 
-    Project toEntity(ProjectApiDTO projectApiDTO);
+    Project toEntity(ProjectRequestApiDTO projectApiDTO);
 }

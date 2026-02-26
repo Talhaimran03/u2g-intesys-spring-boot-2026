@@ -76,7 +76,7 @@ paths:
   /projects:
     get:
       summary: Get all projects
-      tags: [Project]
+      tags: [ Project ]
       operationId: getAllProjects
       responses:
         '200':
@@ -86,44 +86,31 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Project'
+                  $ref: '#/components/schemas/ProjectResponse'
     post:
       summary: Create a new project
-      tags: [Project]
+      tags: [ Project ]
       operationId: createProject
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Project'
+              $ref: '#/components/schemas/ProjectRequest'
       responses:
-        '200':
-          description: List of projects after creation
+        '201':
+          description: Project created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/ProjectResponse'
         '400':
           description: Invalid project details
-    delete:
-      summary: Delete all projects
-      tags: [Project]
-      operationId: deleteAllProjects
-      responses:
-        '200':
-          description: List of projects after deletion
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Project'
 
   /projects/{id}:
     get:
       summary: Get project by ID
-      tags: [Project]
+      tags: [ Project ]
       operationId: getProjectById
       parameters:
         - name: id
@@ -138,11 +125,91 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/ProjectResponse'
+        '404':
+          description: Project not found
+    put:
+      summary: Update project by ID
+      tags: [ Project ]
+      operationId: updateProjectById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '400':
+          description: Invalid project details
+        '403':
+          description: Forbidden (not owner)
+        '404':
+          description: Project not found
+    delete:
+      summary: Delete project by ID
+      tags: [ Project ]
+      operationId: deleteProjectById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Project deleted
+        '403':
+          description: Forbidden (not owner)
         '404':
           description: Project not found
 
+  /logout:
+    post:
+      summary: Logout user
+      tags: [ User ]
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+
+  /me:
+    get:
+      summary: Get current user info from JWT token
+      tags: [ User ]
+      operationId: me
+      responses:
+        '200':
+          description: User info returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+        '401':
+          description: Missing or invalid token
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     User:
       type: object
@@ -163,7 +230,16 @@ components:
           type: string
         password:
           type: string
-    Project:
+    ProjectRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+    ProjectResponse:
       type: object
       properties:
         id:
@@ -173,4 +249,5 @@ components:
           type: string
         description:
           type: string
-
+        ownerUsername:
+          type: string

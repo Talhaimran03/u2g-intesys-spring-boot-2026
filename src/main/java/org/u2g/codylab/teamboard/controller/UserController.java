@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.api.UserApi;
 import org.u2g.codylab.teamboard.dto.Login200ResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.Me200ResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.UserApiDTO;
-import org.u2g.codylab.teamboard.entity.LoginRequest;
-import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.service.JwtService;
 import org.u2g.codylab.teamboard.service.UserService;
 
@@ -47,5 +46,20 @@ public class UserController implements UserApi {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-}
 
+    @Override
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Me200ResponseApiDTO> me() {
+
+        Me200ResponseApiDTO username = userService.me();
+
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(username);
+    }
+}

@@ -1,9 +1,24 @@
 package org.u2g.codylab.teamboard.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "projects")
 public class Project {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String title;
+
+    @Column
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
     public Long getId() {
         return id;
@@ -29,9 +44,11 @@ public class Project {
         this.description = description;
     }
 
-    public Project(Long id, String title, String description) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 }
