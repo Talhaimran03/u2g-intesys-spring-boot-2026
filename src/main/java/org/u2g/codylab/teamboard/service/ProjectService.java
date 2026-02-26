@@ -39,10 +39,8 @@ public class ProjectService {
         Page<Project> projectPage;
 
         if (title != null && !title.isEmpty()) {
-            // Recherche par titre
             projectPage = projectRepository.findByOwnerAndTitleContainingIgnoreCase(loggedInUser, title, pageable);
         } else {
-            // Tous les projets paginés
             projectPage = projectRepository.findProjectByOwner(loggedInUser, pageable);
         }
 
