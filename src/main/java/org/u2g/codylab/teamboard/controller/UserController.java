@@ -19,16 +19,16 @@ public class UserController implements UserApi {
     private final UserService userService;
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
-    private final UserMapper userMapper;  // ← AJOUTÉ
+    private final UserMapper userMapper;
 
     public UserController(UserService userService,
                           JwtService jwtService,
                           TokenBlacklistService tokenBlacklistService,
-                          UserMapper userMapper) {  // ← AJOUTÉ
+                          UserMapper userMapper) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.tokenBlacklistService = tokenBlacklistService;
-        this.userMapper = userMapper;  // ← AJOUTÉ
+        this.userMapper = userMapper;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.u2g.codylab.teamboard.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.api.ProjectApi;
+import org.u2g.codylab.teamboard.dto.ProjectPageResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.service.ProjectService;
@@ -18,9 +19,14 @@ public class ProjectController implements ProjectApi {
         this.projectService = projectService;
     }
 
-    @Override
-    public ResponseEntity<List<ProjectResponseApiDTO>> getAllProjects() {
-        return ResponseEntity.ok(projectService.getAllProjects());
+
+    @GetMapping("/projects")
+    public ResponseEntity<ProjectPageResponseApiDTO> getAllProjects(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size,
+            @RequestParam(required = false, defaultValue = "title") String sort,
+            @RequestParam(required = false) String title) {
+        return ResponseEntity.ok(projectService.getAllProjects(page, size, sort, title));
     }
 
     @Override

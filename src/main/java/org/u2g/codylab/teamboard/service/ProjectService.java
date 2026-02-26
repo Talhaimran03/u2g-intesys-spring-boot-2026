@@ -1,8 +1,13 @@
 package org.u2g.codylab.teamboard.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.u2g.codylab.teamboard.dto.ProjectPageResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;
@@ -26,12 +31,29 @@ public class ProjectService {
         this.userRepository = userRepository;
     }
 
-    public List<ProjectResponseApiDTO> getAllProjects() {
+    public ProjectPageResponseApiDTO getAllProjects(int page, int size, String sort, String title) {
 
         User loggedInUser = getLoggedUser();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort).ascending());
 
-        List<Project> projectResponseApiDTOS = projectRepository.findProjectByOwner(loggedInUser);
-        return projectResponseApiDTOS.stream().map(projectMapper::toApiDTO).toList();
+        Page<Project> projectPage;
+
+        if (title != null && !title.isEmpty()) {
+            // Recherche par titre
+            projectPage = projectRepository.findByOwnerAndTitleContainingIgnoreCase(loggedInUser, title, pageable);
+        } else {
+            // Tous les projets paginés
+            projectPage = projectRepository.findProjectByOwner(loggedInUser, pageable);
+        }
+
+        ProjectPageResponseApiDTO response = new ProjectPageResponseApiDTO();
+        response.setContent(projectPage.getContent().stream().map(projectMapper::toApiDTO).toList());
+        response.setTotalElements(projectPage.getTotalElements());
+        response.setTotalPages(projectPage.getTotalPages());
+        response.setCurrentPage(projectPage.getNumber());
+        response.setPageSize(projectPage.getSize());
+
+        return response;
     }
 
     public ProjectResponseApiDTO addProject(ProjectRequestApiDTO project) {

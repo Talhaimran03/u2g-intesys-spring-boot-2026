@@ -99,9 +99,28 @@ paths:
       summary: Get all projects
       tags: [ Project ]
       operationId: getAllProjects
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: title
       responses:
         '200':
-          description: List of all projects
+          description: Paginated list of projects
           content:
             application/json:
               schema:
@@ -276,3 +295,20 @@ components:
           type: string
         ownerUsername:
           type: string
+    ProjectPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectResponse'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        currentPage:
+          type: integer
+        pageSize:
+          type: integer
+
