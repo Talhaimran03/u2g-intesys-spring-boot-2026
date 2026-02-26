@@ -3,7 +3,8 @@ package org.u2g.codylab.teamboard.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.api.ProjectApi;
-import org.u2g.codylab.teamboard.dto.ProjectApiDTO;
+import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.service.ProjectService;
 
 import java.util.List;
@@ -18,23 +19,27 @@ public class ProjectController implements ProjectApi {
     }
 
     @Override
-    public ResponseEntity<List<ProjectApiDTO>> getAllProjects() {
+    public ResponseEntity<List<ProjectResponseApiDTO>> getAllProjects() {
         return ResponseEntity.ok(projectService.getAllProjects());
     }
 
     @Override
-    public ResponseEntity<ProjectApiDTO> createProject(ProjectApiDTO projectApiDTO) {
+    public ResponseEntity<ProjectResponseApiDTO> createProject(ProjectRequestApiDTO projectApiDTO) {
         return ResponseEntity.ok(projectService.addProject(projectApiDTO));
     }
 
     @Override
-    public ResponseEntity<List<ProjectApiDTO>> deleteAllProjects() {
-        return  ResponseEntity.ok(projectService.deleteProjects());
+    public ResponseEntity<Void> deleteProjectById(Long id) {
+        return  ResponseEntity.ok(projectService.deleteProjectById(id));
     }
 
     @Override
-    public ResponseEntity<ProjectApiDTO> getProjectById(Long id) {
-        return  ResponseEntity.ok(projectService.getProjectById(id));
+    public ResponseEntity<ProjectResponseApiDTO> getProjectById(Long id) {
+        return ResponseEntity.ok(projectService.getProjectById(id));
     }
 
+    @Override
+    public ResponseEntity<ProjectResponseApiDTO> updateProjectById(Long id, ProjectRequestApiDTO projectRequestApiDTO) {
+        return ResponseEntity.ok(projectService.updateProjectById(id, projectRequestApiDTO));
+    }
 }
