@@ -30,7 +30,7 @@ public class ProjectController implements ProjectApi {
 
     @Override
     public ResponseEntity<Void> deleteProjectById(Long id) {
-        return  ResponseEntity.ok(projectService.deleteProjectById(id));
+        return ResponseEntity.ok(projectService.deleteProjectById(id));
     }
 
     @Override
