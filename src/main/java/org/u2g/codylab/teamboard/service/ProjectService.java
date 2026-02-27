@@ -1,5 +1,7 @@
 package org.u2g.codylab.teamboard.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,13 +29,24 @@ public class ProjectService {
         this.userRepository = userRepository;
     }
 
-    public List<ProjectResponseApiDTO> getAllProjects() {
+//    public List<ProjectResponseApiDTO> getAllProjects() {
+//
+//        User loggedInUser = getLoggedUser();
+//
+//        List<Project> projectResponseApiDTOS = projectRepository.findProjectByOwner(loggedInUser);
+//        return projectResponseApiDTOS.stream().map(projectMapper::toApiDTO).toList();
+//    }
+
+    public Page<ProjectResponseApiDTO> getAllProjects(Pageable pageable) {
 
         User loggedInUser = getLoggedUser();
 
-        List<Project> projectResponseApiDTOS = projectRepository.findProjectByOwner(loggedInUser);
-        return projectResponseApiDTOS.stream().map(projectMapper::toApiDTO).toList();
+        Page<Project> projectPage =
+                projectRepository.findProjectByOwner(loggedInUser, pageable);
+
+        return projectPage.map(projectMapper::toApiDTO);
     }
+
 
     public ProjectResponseApiDTO addProject(ProjectRequestApiDTO project) {
         Project projectEntity = projectMapper.toEntity(project);
@@ -82,6 +95,10 @@ public class ProjectService {
         String username = authentication.getName();
         return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username: " + username));
     }
+
+//    public Page<Project> getAllProjects(Pageable pageable){
+//        return projectRepository.findAll(pageable);
+//    }
 
 //    public Project getOneProjects(long id){
 //        List<Project> projects = getAllProjects();
