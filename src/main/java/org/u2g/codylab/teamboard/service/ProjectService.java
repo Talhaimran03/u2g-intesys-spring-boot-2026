@@ -6,8 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.CreateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
+import org.u2g.codylab.teamboard.dto.UpdateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.mapper.ProjectMapper;
@@ -15,6 +16,7 @@ import org.u2g.codylab.teamboard.repository.ProjectRepository;
 import org.u2g.codylab.teamboard.repository.UserRepository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ProjectService {
@@ -38,7 +40,7 @@ public class ProjectService {
         return new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
     }
 
-    public ProjectResponseApiDTO addProject(ProjectRequestApiDTO project) {
+    public ProjectResponseApiDTO addProject(CreateProjectRequestApiDTO project) {
         Project projectEntity = projectMapper.toEntity(project);
         projectEntity.setOwner(getLoggedUser());
         Project savedProject = projectRepository.save(projectEntity);
@@ -69,7 +71,7 @@ public class ProjectService {
     }
 
 
-    public ProjectResponseApiDTO updateProjectById(Long id, ProjectRequestApiDTO projectRequestApiDTO) {
+    public ProjectResponseApiDTO updateProjectById(Long id, UpdateProjectRequestApiDTO projectRequestApiDTO) {
         Project project = projectRepository.findById(id).orElse(null);
         if (project == null) {
             throw new RuntimeException("Project not found with id: " + id);
@@ -82,7 +84,7 @@ public class ProjectService {
 
     private User getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        String username = Objects.requireNonNull(authentication).getName();
         return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username: " + username));
     }
 }

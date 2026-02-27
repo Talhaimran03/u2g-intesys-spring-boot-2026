@@ -1,41 +1,65 @@
 openapi: 3.0.3
 info:
   title: TeamBoard API
+  description: Kanban Board API
   version: 1.0.0
+
 servers:
-  - url: /api
+  - url: http://localhost:8080/api
+
+tags:
+  - name: Auth
+  - name: User
+  - name: Project
+  - name: Column
+  - name: Card
 
 security:
   - bearerAuth: []
 
 paths:
 
-  /user/register:
+  /register:
     post:
-      security: []
-      summary: Register a new user
-      tags: [ User ]
       operationId: register
+      tags: [Auth]
+      summary: Register a new user
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
-        '200':
-          description: Registration successful
+        '201':
+          description: User created
         '400':
-          description: Username or password missing
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /user/login:
+  /login:
     post:
-      security: []
-      summary: Login user
-      tags: [ User ]
       operationId: login
+      tags: [Auth]
+      summary: Login user
+      security:
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -44,42 +68,231 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Login successful
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /personal-data:
+    put:
+      operationId: updatePersonalData
+      tags: [User]
+      summary: Update personal data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePersonalDataRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user-data:
+    put:
+      operationId: updateUsername
+      tags: [User]
+      summary: Update username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUsernameRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /update-password:
+    put:
+      operationId: updatePassword
+      tags: [User]
+      summary: Update password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+      responses:
+        '204':
+          description: Password updated
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/{userId}:
+    delete:
+      operationId: deleteUserById
+      tags: [User]
+      summary: Delete a user by ID
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '204':
+          description: User deleteById
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/me:
+    get:
+      summary: Get current user info from JWT token
+      tags: [ User ]
+      operationId: me
+      responses:
+        '200':
+          description: User info returned
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  token:
+                  username:
                     type: string
-        '400':
-          description: Username or password missing
         '401':
-          description: Invalid credentials
+          description: Missing or invalid token
 
-  /user/{id}:
-    delete:
-      summary: Delete user by ID
-      tags: [ User ]
-      operationId: deleteUserById
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '204':
-          description: User deleted successfully
-        '404':
-          description: User not found
-
-  /projects:
+  /project:
     get:
-      summary: Get all projects (paginated)
-      tags: [ Project ]
       operationId: getAllProjects
+      tags: [Project]
+      summary: Get all projects
       parameters:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
@@ -100,16 +313,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProjectResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     post:
-      summary: Create a new project
-      tags: [ Project ]
       operationId: createProject
+      tags: [Project]
+      summary: Create new project
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectRequest'
+              $ref: '#/components/schemas/CreateProjectRequest'
       responses:
         '201':
           description: Project created
@@ -118,13 +349,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProjectResponse'
         '400':
-          description: Invalid project details
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Project already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /projects/{id}:
+  /project/{id}:
     get:
-      summary: Get project by ID
-      tags: [ Project ]
       operationId: getProjectById
+      tags: [Project]
+      summary: Get project by ID
       parameters:
         - name: id
           in: path
@@ -134,17 +393,39 @@ paths:
             format: int64
       responses:
         '200':
-          description: Project found
+          description: Project details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProjectResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
-      summary: Update project by ID
-      tags: [ Project ]
-      operationId: updateProjectById
+      operationId: updateProject
+      tags: [Project]
+      summary: Update project
       parameters:
         - name: id
           in: path
@@ -157,7 +438,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectRequest'
+              $ref: '#/components/schemas/UpdateProjectRequest'
       responses:
         '200':
           description: Project updated
@@ -166,15 +447,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProjectResponse'
         '400':
-          description: Invalid project details
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Forbidden (not owner)
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
-      summary: Delete project by ID
-      tags: [ Project ]
       operationId: deleteProjectById
+      tags: [Project]
+      summary: Delete project
       parameters:
         - name: id
           in: path
@@ -185,53 +490,73 @@ paths:
       responses:
         '204':
           description: Project deleted
-        '403':
-          description: Forbidden (not owner)
-        '404':
-          description: Project not found
-
-  /me:
-    get:
-      summary: Get current user info from JWT token
-      tags: [ User ]
-      operationId: me
-      responses:
-        '200':
-          description: User info returned
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  username:
-                    type: string
-        '401':
-          description: Missing or invalid token
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /column:
     get:
-      summary: Get all columns
-      tags: [ Column ]
       operationId: getAllColumns
+      tags: [Column]
+      summary: Get all columns
       responses:
         '200':
-          description: List of all columns
+          description: List of columns
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/ColumnResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     post:
-      summary: Create a new column
-      tags: [ Column ]
       operationId: createColumn
+      tags: [Column]
+      summary: Create new column
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ColumnRequest'
+              $ref: '#/components/schemas/CreateColumnRequest'
       responses:
         '201':
           description: Column created
@@ -239,16 +564,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ColumnResponse'
-        '404':
-          description: Project not found
         '400':
-          description: Invalid column details
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Column already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /column/{id}:
     get:
-      summary: Get column by ID
-      tags: [ Column ]
       operationId: getColumnById
+      tags: [Column]
+      summary: Get column by ID
       parameters:
         - name: id
           in: path
@@ -258,17 +609,39 @@ paths:
             format: int64
       responses:
         '200':
-          description: Column found
+          description: Column details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ColumnResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Column not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
-      summary: Update column by ID
-      tags: [ Column ]
-      operationId: updateColumnById
+      operationId: updateColumn
+      tags: [Column]
+      summary: Update column
       parameters:
         - name: id
           in: path
@@ -281,7 +654,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ColumnRequest'
+              $ref: '#/components/schemas/UpdateColumnRequest'
       responses:
         '200':
           description: Column updated
@@ -289,14 +662,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ColumnResponse'
-        '404':
-          description: Column or project not found
         '400':
-          description: Invalid column details
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Column not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
-      summary: Delete column by ID
-      tags: [ Column ]
       operationId: deleteColumnById
+      tags: [Column]
+      summary: Delete column
       parameters:
         - name: id
           in: path
@@ -307,37 +706,85 @@ paths:
       responses:
         '204':
           description: Column deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Column not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /card:
     post:
-      summary: Create a new card
-      tags: [ Card ]
       operationId: createCard
+      tags: [Card]
+      summary: Create new card
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CardRequest'
+              $ref: '#/components/schemas/CreateCardRequest'
       responses:
         '201':
           description: Card created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CardResponse'
-        '404':
-          description: Card not found
+                $ref: '#/components/schemas/Card'
         '400':
-          description: Invalid card details
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Card already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /card/{id}:
     get:
-      summary: Get card by ID
-      tags: [ Card ]
       operationId: getCardById
+      tags: [Card]
+      summary: Get card by ID
       parameters:
         - name: id
           in: path
@@ -347,17 +794,39 @@ paths:
             format: int64
       responses:
         '200':
-          description: Card found
+          description: Card details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/Card'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Card not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
-      summary: Update card by ID
-      tags: [ Card ]
-      operationId: updateCardById
+      operationId: updateCard
+      tags: [Card]
+      summary: Update card
       parameters:
         - name: id
           in: path
@@ -370,22 +839,48 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CardRequest'
+              $ref: '#/components/schemas/UpdateCardRequest'
       responses:
         '200':
           description: Card updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CardResponse'
-        '404':
-          description: Card or column not found
+                $ref: '#/components/schemas/Card'
         '400':
-          description: Invalid card details
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
-      summary: Delete card by ID
-      tags: [ Card ]
       operationId: deleteCardById
+      tags: [Card]
+      summary: Delete card
       parameters:
         - name: id
           in: path
@@ -396,111 +891,32 @@ paths:
       responses:
         '204':
           description: Card deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Card not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
-  schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        username:
-          type: string
-        password:
-          type: string
-        email:
-          type: string
-    LoginRequest:
-      type: object
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-    ProjectRequest:
-      type: object
-      required:
-        - title
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-    ProjectResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        title:
-          type: string
-        description:
-          type: string
-        ownerUsername:
-          type: string
-    ColumnRequest:
-      type: object
-      required:
-        - title
-        - position
-        - projectId
-      properties:
-        title:
-          type: string
-        position:
-          type: integer
-        projectId:
-          type: integer
-          format: int64
-    ColumnResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        title:
-          type: string
-        position:
-          type: integer
-        projectId:
-          type: integer
-          format: int64
-    CardRequest:
-      type: object
-      required:
-        - title
-        - assignedTo
-        - columnId
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        assignedTo:
-          type: integer
-          format: int64
-        columnId:
-          type: integer
-          format: int64
-    CardResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        title:
-          type: string
-        description:
-          type: string
-        assignedTo:
-          type: integer
-          format: int64
-        columnId:
-          type: integer
-          format: int64
 
   headers:
     X-Total-Count:
@@ -520,6 +936,34 @@ components:
       description: Page size
 
   parameters:
+    userId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    projectId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    columnId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    cardId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
     Page:
       name: page
       description: Page number
@@ -546,3 +990,282 @@ components:
         type: string
       in: query
       required: false
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+        - email
+        - name
+        - surname
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/User'
+
+    UpdatePersonalDataRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+
+    UpdateUsernameRequest:
+      type: object
+      properties:
+        username:
+          type: string
+
+    UpdatePasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+        createdBy:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateProjectRequest:
+      type: object
+      required:
+        - title
+        - description
+        - members
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        members:
+          type: array
+          items:
+            type: integer
+            format: int64
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              position:
+                type: integer
+              projectId:
+                type: integer
+                format: int64
+
+    UpdateProjectRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        members:
+          type: array
+          items:
+            type: integer
+            format: int64
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+
+    ProjectResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        cardsNumber:
+          type: number
+          format: int32
+        createdBy:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Column:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        position:
+          type: integer
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+        projectId:
+          type: integer
+          format: int64
+
+    CreateColumnRequest:
+      type: object
+      required:
+        - title
+        - position
+      properties:
+        title:
+          type: string
+        position:
+          type: integer
+        projectId:
+          type: integer
+          format: int64
+
+    UpdateColumnRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        position:
+          type: integer
+
+    ColumnResponse:
+      allOf:
+        - $ref: '#/components/schemas/Column'
+
+    Card:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        assignedTo:
+          $ref: '#/components/schemas/User'
+        columnId:
+          type: integer
+          format: int64
+
+    CreateCardRequest:
+      type: object
+      required:
+        - title
+        - columnId
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        assignedToId:
+          type: integer
+          format: int64
+        columnId:
+          type: integer
+          format: int64
+
+    UpdateCardRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        assignedToId:
+          type: integer
+          format: int64
+        columnId:
+          type: integer
+          format: int64
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
