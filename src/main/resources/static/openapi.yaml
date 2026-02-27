@@ -2,6 +2,8 @@ openapi: 3.0.3
 info:
   title: TeamBoard API
   version: 1.0.0
+servers:
+  - url: /api
 
 security:
   - bearerAuth: []
@@ -75,12 +77,26 @@ paths:
 
   /projects:
     get:
-      summary: Get all projects
+      summary: Get all projects (paginated)
       tags: [ Project ]
       operationId: getAllProjects
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Sort"
+          schema:
+            type: string
+            default: title,asc
       responses:
         '200':
-          description: List of all projects
+          description: Paginated list of projects
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
+            X-Page-Size:
+              $ref: '#/components/headers/X-Page-Size'
+            X-Page-Number:
+              $ref: '#/components/headers/X-Page-Number'
           content:
             application/json:
               schema:
@@ -177,15 +193,6 @@ paths:
         '404':
           description: Project not found
 
-  /logout:
-    post:
-      summary: Logout user
-      tags: [ User ]
-      operationId: logout
-      responses:
-        '200':
-          description: Logout successful
-
   /me:
     get:
       summary: Get current user info from JWT token
@@ -205,11 +212,6 @@ paths:
           description: Missing or invalid token
 
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
   schemas:
     User:
       type: object
@@ -251,3 +253,48 @@ components:
           type: string
         ownerUsername:
           type: string
+
+  headers:
+    X-Total-Count:
+      schema:
+        format: int32
+        type: integer
+      description: Total amount of elements for this query
+    X-Page-Number:
+      schema:
+        format: int32
+        type: integer
+      description: Page number starting from 0
+    X-Page-Size:
+      schema:
+        format: int32
+        type: integer
+      description: Page size
+
+  parameters:
+    Page:
+      name: page
+      description: Page number
+      schema:
+        format: int32
+        default: 0
+        type: integer
+      in: query
+      required: false
+    Size:
+      name: size
+      description: Page size
+      schema:
+        format: int32
+        default: 10
+        type: integer
+      in: query
+      required: false
+    Sort:
+      name: sort
+      description: 'The field to be sorted, direction (e.g.: id,desc)'
+      schema:
+        default: 'title,asc'
+        type: string
+      in: query
+      required: false
