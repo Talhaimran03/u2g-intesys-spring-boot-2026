@@ -1,6 +1,8 @@
 package org.u2g.codylab.teamboard.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "projects")
@@ -10,15 +12,18 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @jakarta.persistence.Column(nullable = false)
     private String title;
 
-    @Column
+    @jakarta.persistence.Column(nullable = true)
     private String description;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Column> columns = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -50,5 +55,13 @@ public class Project {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public List<Column> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<Column> columns) {
+        this.columns = columns;
     }
 }

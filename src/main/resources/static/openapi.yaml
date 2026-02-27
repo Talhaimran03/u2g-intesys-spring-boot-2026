@@ -84,9 +84,6 @@ paths:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
         - $ref: "#/components/parameters/Sort"
-          schema:
-            type: string
-            default: title,asc
       responses:
         '200':
           description: Paginated list of projects
