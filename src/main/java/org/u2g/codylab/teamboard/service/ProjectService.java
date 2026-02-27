@@ -1,13 +1,11 @@
 package org.u2g.codylab.teamboard.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.u2g.codylab.teamboard.dto.ProjectPageResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;
@@ -31,27 +29,13 @@ public class ProjectService {
         this.userRepository = userRepository;
     }
 
-    public ProjectPageResponseApiDTO getAllProjects(int page, int size, String sort, String title) {
+    public Page<ProjectResponseApiDTO> getAllProjects(Pageable pageData) {
 
         User loggedInUser = getLoggedUser();
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort).ascending());
 
-        Page<Project> projectPage;
-
-        if (title != null && !title.isEmpty()) {
-            projectPage = projectRepository.findByOwnerAndTitleContainingIgnoreCase(loggedInUser, title, pageable);
-        } else {
-            projectPage = projectRepository.findProjectByOwner(loggedInUser, pageable);
-        }
-
-        ProjectPageResponseApiDTO response = new ProjectPageResponseApiDTO();
-        response.setContent(projectPage.getContent().stream().map(projectMapper::toApiDTO).toList());
-        response.setTotalElements(projectPage.getTotalElements());
-        response.setTotalPages(projectPage.getTotalPages());
-        response.setCurrentPage(projectPage.getNumber());
-        response.setPageSize(projectPage.getSize());
-
-        return response;
+        Page<Project> projectPage = projectRepository.findProjectByOwner(loggedInUser, pageData);
+        List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream().map(projectMapper::toApiDTO).toList();
+        return new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
     }
 
     public ProjectResponseApiDTO addProject(ProjectRequestApiDTO project) {

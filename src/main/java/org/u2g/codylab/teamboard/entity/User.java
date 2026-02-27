@@ -12,7 +12,7 @@ public class User {
     private String surname;
     private String email;
 
-    @Column(unique = true)
+    @jakarta.persistence.Column(unique = true)
     private String username;
     private String password;
 

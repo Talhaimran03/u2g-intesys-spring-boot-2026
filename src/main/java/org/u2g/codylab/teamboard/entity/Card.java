@@ -1,12 +1,10 @@
 package org.u2g.codylab.teamboard.entity;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "projects")
-public class Project {
+@Table(name = "cards")
+public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,18 +13,19 @@ public class Project {
     @jakarta.persistence.Column(nullable = false)
     private String title;
 
-    @jakarta.persistence.Column(nullable = true)
+    @jakarta.persistence.Column
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @JoinColumn(name = "assigned_to", nullable = false)
+    private User assignedTo;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Column> columns = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "column_id", nullable = false)
+    private Column column;
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(Long id) {
@@ -49,19 +48,19 @@ public class Project {
         this.description = description;
     }
 
-    public User getOwner() {
-        return owner;
+    public User getAssignedTo() {
+        return assignedTo;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setAssignedTo(User assignedTo) {
+        this.assignedTo = assignedTo;
     }
 
-    public List<Column> getColumns() {
-        return columns;
+    public Column getColumn() {
+        return column;
     }
 
-    public void setColumns(List<Column> columns) {
-        this.columns = columns;
+    public void setColumn(Column column) {
+        this.column = column;
     }
 }
