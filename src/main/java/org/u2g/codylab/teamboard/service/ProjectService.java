@@ -1,5 +1,8 @@
 package org.u2g.codylab.teamboard.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,12 +29,13 @@ public class ProjectService {
         this.userRepository = userRepository;
     }
 
-    public List<ProjectResponseApiDTO> getAllProjects() {
+    public Page<ProjectResponseApiDTO> getAllProjects(Pageable pageData) {
 
         User loggedInUser = getLoggedUser();
 
-        List<Project> projectResponseApiDTOS = projectRepository.findProjectByOwner(loggedInUser);
-        return projectResponseApiDTOS.stream().map(projectMapper::toApiDTO).toList();
+        Page<Project> projectPage = projectRepository.findProjectByOwner(loggedInUser, pageData);
+        List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream().map(projectMapper::toApiDTO).toList();
+        return new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
     }
 
     public ProjectResponseApiDTO addProject(ProjectRequestApiDTO project) {
