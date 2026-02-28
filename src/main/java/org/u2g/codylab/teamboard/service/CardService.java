@@ -43,6 +43,28 @@ public class CardService {
         return cardMapper.toResponse(saved);
     }
 
+    public CardResponseApiDTO getCardById(Long id) {
+        Card card = cardRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return cardMapper.toResponse(card);
+    }
+    public CardResponseApiDTO updateCardById(Long id, CardRequestApiDTO cardRequestApiDTO) {
+        Card card =  cardRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        User user = userRepository.findById(cardRequestApiDTO.getAssignedTo())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        card.setColumn(column);
+        card.setAssignedTo(user);
+        card.setTitle(cardRequestApiDTO.getTitle());
+        card.setDescription(cardRequestApiDTO.getDescription());
+
+        Card saved = cardRepository.save(card);
+        return cardMapper.toResponse(saved);
+
+    }
+
     public Void deleteCardById(Long id) {
         if (!cardRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

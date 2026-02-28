@@ -26,14 +26,14 @@ public class CardController implements CardApi {
         return ResponseEntity.ok(cardService.deleteCardById(id));
     }
 
-    //TODO homework
+
     @Override
     public ResponseEntity<CardResponseApiDTO> getCardById(Long id) {
-        return CardApi.super.getCardById(id);
+        return ResponseEntity.ok(cardService.getCardById(id));
     }
 
     @Override
     public ResponseEntity<CardResponseApiDTO> updateCardById(Long id, CardRequestApiDTO cardRequestApiDTO) {
-        return CardApi.super.updateCardById(id, cardRequestApiDTO);
+        return ResponseEntity.ok(cardService.updateCardById(id, cardRequestApiDTO));
     }
 }
