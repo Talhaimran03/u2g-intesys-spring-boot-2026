@@ -35,6 +35,7 @@ public class AppErrorHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(errorResponse.getStatus()));
     }
-
+    @ExceptionHandler(CustomConflictException.class) public ResponseEntity<ErrorResponseApiDTO> handleConflict(CustomConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getErrorResponse()); }
 }
 

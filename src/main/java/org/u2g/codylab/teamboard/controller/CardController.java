@@ -3,8 +3,9 @@ package org.u2g.codylab.teamboard.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.u2g.codylab.teamboard.api.CardApi;
-import org.u2g.codylab.teamboard.dto.CardRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.CardResponseApiDTO;
+import org.u2g.codylab.teamboard.dto.CardApiDTO;
+import org.u2g.codylab.teamboard.dto.CreateCardRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.UpdateCardRequestApiDTO;
 import org.u2g.codylab.teamboard.service.CardService;
 
 @RestController
@@ -17,23 +18,26 @@ public class CardController implements CardApi {
     }
 
     @Override
-    public ResponseEntity<CardResponseApiDTO> createCard(CardRequestApiDTO cardRequestApiDTO) {
-        return ResponseEntity.ok(cardService.createCard(cardRequestApiDTO));
+    public ResponseEntity<CardApiDTO> createCard(CreateCardRequestApiDTO createCardRequestApiDTO) {
+        CardApiDTO response = cardService.createCard(createCardRequestApiDTO);
+        return ResponseEntity.status(201).body(response);
     }
 
     @Override
     public ResponseEntity<Void> deleteCardById(Long id) {
-        return ResponseEntity.ok(cardService.deleteCardById(id));
-    }
-
-
-    @Override
-    public ResponseEntity<CardResponseApiDTO> getCardById(Long id) {
-        return ResponseEntity.ok(cardService.getCardById(id));
+        cardService.deleteCardById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<CardResponseApiDTO> updateCardById(Long id, CardRequestApiDTO cardRequestApiDTO) {
-        return ResponseEntity.ok(cardService.updateCardById(id, cardRequestApiDTO));
+    public ResponseEntity<CardApiDTO> getCardById(Long id) {
+        CardApiDTO response = cardService.getCardById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<CardApiDTO> updateCard(Long id, UpdateCardRequestApiDTO updateCardRequestApiDTO) {
+        CardApiDTO response = cardService.updateCardById(id, updateCardRequestApiDTO);
+        return ResponseEntity.ok(response);
     }
 }

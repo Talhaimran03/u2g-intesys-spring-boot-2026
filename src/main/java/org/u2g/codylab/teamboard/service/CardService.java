@@ -1,19 +1,24 @@
 package org.u2g.codylab.teamboard.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.u2g.codylab.teamboard.dto.CardRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.CardResponseApiDTO;
+import org.u2g.codylab.teamboard.dto.CreateCardRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.CardApiDTO;
+import org.u2g.codylab.teamboard.dto.UpdateCardRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.Card;
 import org.u2g.codylab.teamboard.entity.Column;
-import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.entity.User;
+import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.CardMapper;
 import org.u2g.codylab.teamboard.repository.CardRepository;
 import org.u2g.codylab.teamboard.repository.ColumnRepository;
 import org.u2g.codylab.teamboard.repository.UserRepository;
 
+@Slf4j
+@Transactional
 @Service
 public class CardService {
 
@@ -29,47 +34,58 @@ public class CardService {
         this.cardMapper = cardMapper;
     }
 
-    public CardResponseApiDTO createCard(CardRequestApiDTO cardRequestApiDTO) {
-        Column project = columnRepository.findById(cardRequestApiDTO.getColumnId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public CardApiDTO createCard(CreateCardRequestApiDTO cardRequestApiDTO) {
+        log.info("Creating card: {}", cardRequestApiDTO);
+        Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
+                .orElseThrow(() -> new CustomNotFoundException("column not found with id: " + cardRequestApiDTO.getColumnId()));
 
-        User user = userRepository.findById(cardRequestApiDTO.getAssignedTo())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        User user = userRepository.findById(cardRequestApiDTO.getAssignedToId())
+                .orElseThrow(() -> new CustomNotFoundException("user not found with id: " + cardRequestApiDTO.getAssignedToId()));
 
         Card card = cardMapper.toEntity(cardRequestApiDTO);
-        card.setColumn(project);
-        card.setAssignedTo(user);
-        Card saved = cardRepository.save(card);
-        return cardMapper.toResponse(saved);
-    }
-
-    public CardResponseApiDTO getCardById(Long id) {
-        Card card = cardRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return cardMapper.toResponse(card);
-    }
-    public CardResponseApiDTO updateCardById(Long id, CardRequestApiDTO cardRequestApiDTO) {
-        Card card =  cardRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        User user = userRepository.findById(cardRequestApiDTO.getAssignedTo())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         card.setColumn(column);
         card.setAssignedTo(user);
-        card.setTitle(cardRequestApiDTO.getTitle());
-        card.setDescription(cardRequestApiDTO.getDescription());
-
         Card saved = cardRepository.save(card);
-        return cardMapper.toResponse(saved);
 
+        log.info("Saved card: {}", saved);
+        return cardMapper.toResponse(saved);
     }
 
-    public Void deleteCardById(Long id) {
+    public void deleteCardById(Long id) {
+        log.info("Deleting card: {}", id);
         if (!cardRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new CustomNotFoundException("card not found with id: " + id);
         }
         cardRepository.deleteById(id);
-        return null;
+        log.info("Deleted card: {}", id);
+    }
+
+    public CardApiDTO getCardById(Long id) {
+        log.info("Getting card: {}", id);
+        Card card = cardRepository.findById(id)
+                .orElseThrow(() -> new CustomNotFoundException("card not found with id: " + id));
+        log.info("Card found: {}", card);
+        return cardMapper.toResponse(card);
+    }
+
+    public CardApiDTO updateCardById(Long id, UpdateCardRequestApiDTO cardRequestApiDTO) {
+        log.info("Updating card: {}", id);
+        Card card = cardRepository.findById(id)
+                .orElseThrow(() -> new CustomNotFoundException("card not found with id: " + id));
+        card.setTitle(cardRequestApiDTO.getTitle());
+        card.setDescription(cardRequestApiDTO.getDescription());
+        if (cardRequestApiDTO.getAssignedToId() != null) {
+            User user = userRepository.findById(cardRequestApiDTO.getAssignedToId())
+                    .orElseThrow(() -> new CustomNotFoundException("user not found with id: " + cardRequestApiDTO.getAssignedToId()));
+            card.setAssignedTo(user);
+        }
+        if (cardRequestApiDTO.getColumnId() != null) {
+            Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
+                    .orElseThrow(() -> new CustomNotFoundException("column not found with id: " + cardRequestApiDTO.getColumnId()));
+            card.setColumn(column);
+        }
+        Card updated = cardRepository.save(card);
+        log.info("Updated card: {}", updated);
+        return cardMapper.toResponse(updated);
     }
 }

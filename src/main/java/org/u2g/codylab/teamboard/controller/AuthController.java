@@ -7,6 +7,7 @@ import org.u2g.codylab.teamboard.api.AuthApi;
 import org.u2g.codylab.teamboard.dto.AuthResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.RegisterRequestApiDTO;
+import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.service.JwtService;
 import org.u2g.codylab.teamboard.service.UserService;
 
@@ -22,14 +23,13 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<AuthResponseApiDTO> login(LoginRequestApiDTO loginRequestApiDTO) {
-        return userService.login(loginRequestApiDTO)
-                .map(u ->{
-                    String token = jwtService.generateToken(loginRequestApiDTO.getUsername());
-                    AuthResponseApiDTO response = new AuthResponseApiDTO();
-                    response.setToken(token);
-                    return ResponseEntity.ok(response);
-                }).orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        User user = userService.login(loginRequestApiDTO);
+        String token = jwtService.generateToken(user.getUsername());
+        AuthResponseApiDTO response = new AuthResponseApiDTO();
+        response.setToken(token);
+        return ResponseEntity.ok(response);
     }
+
 
     @Override
     public ResponseEntity<Void> register(RegisterRequestApiDTO registerRequestApiDTO) {
