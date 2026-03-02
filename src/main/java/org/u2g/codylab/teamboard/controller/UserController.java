@@ -47,7 +47,6 @@ public class UserController implements UserApi {
         }
     }
 
-    @Override
     public ResponseEntity<Void> logout() {
         return ResponseEntity.ok().build();
     }
