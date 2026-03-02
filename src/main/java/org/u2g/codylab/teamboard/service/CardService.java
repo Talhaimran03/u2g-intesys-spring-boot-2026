@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.u2g.codylab.teamboard.dto.CardRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.CardResponseApiDTO;
+import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.entity.Card;
 import org.u2g.codylab.teamboard.entity.Column;
 import org.u2g.codylab.teamboard.entity.Project;
@@ -50,4 +52,23 @@ public class CardService {
         cardRepository.deleteById(id);
         return null;
     }
+
+    public CardResponseApiDTO getCardById(Long id){
+        if (!cardRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return cardMapper.toResponse(cardRepository.getOne(id));
+    }
+
+    public CardResponseApiDTO updateCardById(Long id, CardRequestApiDTO cardRequestApiDTO) {
+        Card card = cardRepository.findById(id).orElse(null);
+        if (card == null) {
+            throw new RuntimeException("Card not found with id: " + id);
+        }
+        card.setTitle(cardRequestApiDTO.getTitle());
+        card.setDescription(cardRequestApiDTO.getDescription());
+        Card updatedCard = cardRepository.save(card);
+        return cardMapper.toResponse(updatedCard);
+    }
+
 }
