@@ -16,6 +16,8 @@ public class User {
     private String username;
     private String password;
 
+    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL)
+    private java.util.List<Card> assignedCards = new java.util.ArrayList<>();
 
     public User() {}
 
@@ -71,5 +73,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public java.util.List<Card> getAssignedCards() {
+        return assignedCards;
+    }
+
+    public void setAssignedCards(java.util.List<Card> assignedCards) {
+        this.assignedCards = assignedCards;
     }
 }

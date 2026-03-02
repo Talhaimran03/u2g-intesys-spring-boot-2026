@@ -19,6 +19,9 @@ public class Column {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @OneToMany(mappedBy = "column", cascade = CascadeType.ALL)
+    private java.util.List<Card> cards = new java.util.ArrayList<>();
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }
@@ -28,4 +31,3 @@ public class Column {
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
 }
-
