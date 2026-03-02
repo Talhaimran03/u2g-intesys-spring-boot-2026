@@ -2,14 +2,14 @@ package org.u2g.codylab.teamboard.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.api.ProjectApi;
 import org.u2g.codylab.teamboard.dto.ProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
-import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.service.ProjectService;
+import org.u2g.codylab.teamboard.util.PageUtils;
 
 import java.util.List;
 
@@ -22,18 +22,20 @@ public class ProjectController implements ProjectApi {
         this.projectService = projectService;
     }
 
-//    @Override
-//    public ResponseEntity<List<ProjectResponseApiDTO>> getAllProjects() {
-//        return ResponseEntity.ok(projectService.getAllProjects());
-//    }
+    @Override
+    public ResponseEntity<List<ProjectResponseApiDTO>> getAllProjects(Integer page, Integer size, String sort) {
 
-    @GetMapping("/projects")
-    public ResponseEntity<Page<ProjectResponseApiDTO>> getAllProjects(
-            @PageableDefault(size = 10, sort = "title") Pageable pageable
-    ) {
-        return ResponseEntity.ok(projectService.getAllProjects(pageable));
+        List<String> sortingFields = List.of("createdAt", "id", "title");
+
+        sort = PageUtils.checkSort(sort, sortingFields);
+        Pageable pageData = PageUtils.buildPageable(page, size, sort);
+
+        Page<ProjectResponseApiDTO> projectResponse = projectService.getAllProjects(pageData);
+
+        return new ResponseEntity<>(projectResponse.getContent(),
+                PageUtils.generatePaginationHttpHeaders(projectResponse),
+                HttpStatus.OK);
     }
-
 
     @Override
     public ResponseEntity<ProjectResponseApiDTO> createProject(ProjectRequestApiDTO projectApiDTO) {
