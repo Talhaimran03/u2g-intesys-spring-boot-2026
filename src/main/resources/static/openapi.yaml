@@ -1263,9 +1263,10 @@ components:
     ErrorResponse:
       type: object
       properties:
-        code:
+        timestamp:
+          type: string
+          format: date-time
+        status:
           type: integer
         message:
-          type: string
-        details:
           type: string

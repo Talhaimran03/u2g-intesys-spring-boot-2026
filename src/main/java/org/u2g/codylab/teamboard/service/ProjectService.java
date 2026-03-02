@@ -1,5 +1,7 @@
 package org.u2g.codylab.teamboard.service;
 
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,9 @@ import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.dto.UpdateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.entity.User;
+import org.u2g.codylab.teamboard.exception.CustomAnauthorizedException;
+import org.u2g.codylab.teamboard.exception.CustomForbiddenException;
+import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.ProjectMapper;
 import org.u2g.codylab.teamboard.repository.ProjectRepository;
 import org.u2g.codylab.teamboard.repository.UserRepository;
@@ -18,6 +23,8 @@ import org.u2g.codylab.teamboard.repository.UserRepository;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
+@Transactional
 @Service
 public class ProjectService {
 
@@ -33,58 +40,81 @@ public class ProjectService {
 
     public Page<ProjectResponseApiDTO> getAllProjects(Pageable pageData) {
 
+        log.info("Getting all projects: {}", pageData);
+
         User loggedInUser = getLoggedUser();
 
         Page<Project> projectPage = projectRepository.findProjectByOwner(loggedInUser, pageData);
         List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream().map(projectMapper::toApiDTO).toList();
-        return new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
+        Page<ProjectResponseApiDTO> responseApiDTOS = new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
+
+        log.info("Retrieved {} projects", responseApiDTOS.getPageable().getPageSize());
+        return responseApiDTOS;
+
     }
 
     public ProjectResponseApiDTO addProject(CreateProjectRequestApiDTO project) {
+        log.info("Adding project: {}", project);
+
         Project projectEntity = projectMapper.toEntity(project);
         projectEntity.setOwner(getLoggedUser());
         Project savedProject = projectRepository.save(projectEntity);
-        return projectMapper.toApiDTO(savedProject);
+        ProjectResponseApiDTO projectResponseApiDTO = projectMapper.toApiDTO(savedProject);
+
+        log.info("Project added: {}", projectResponseApiDTO);
+        return projectResponseApiDTO;
     }
 
     public Void deleteProjectById(Long id) {
+
+        log.info("Deleting project with id: {}", id);
+
         User loggedInUser = getLoggedUser();
 
-        Project project = projectRepository.findById(id).orElse(null);
-
-        if (project == null) {
-            throw new RuntimeException("User not found or project not found");
-        }
+        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + id));
 
         if (project.getOwner().getId().equals(loggedInUser.getId())) {
             projectRepository.deleteById(id);
+            log.info("Project deleted with id: {}", id);
             return null;
-        } else {
-            throw new RuntimeException("User not authorized to delete this project");
         }
+
+        throw new CustomForbiddenException("User not authorized to delete this project");
     }
 
     public ProjectResponseApiDTO getProjectById(Long id) {
-        return projectRepository.findById(id)
+        log.info("Getting project with id: {}", id);
+        ProjectResponseApiDTO projectResponseApiDTO = projectRepository.findById(id)
                 .map(projectMapper::toApiDTO)
-                .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
+                .orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + id));
+        log.info("Retrieved project: {}", projectResponseApiDTO);
+        return projectResponseApiDTO;
     }
 
 
     public ProjectResponseApiDTO updateProjectById(Long id, UpdateProjectRequestApiDTO projectRequestApiDTO) {
-        Project project = projectRepository.findById(id).orElse(null);
-        if (project == null) {
-            throw new RuntimeException("Project not found with id: " + id);
-        }
+
+        log.info("Updating project with id: {}", id);
+
+        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + id));
+
         project.setTitle(projectRequestApiDTO.getTitle());
         project.setDescription(projectRequestApiDTO.getDescription());
         Project updatedProject = projectRepository.save(project);
-        return projectMapper.toApiDTO(updatedProject);
+        ProjectResponseApiDTO projectResponseApiDTO = projectMapper.toApiDTO(updatedProject);
+
+        log.info("Updated project: {}", projectResponseApiDTO);
+        return projectResponseApiDTO;
     }
 
     private User getLoggedUser() {
+        log.info("Getting logged user");
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = Objects.requireNonNull(authentication).getName();
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomAnauthorizedException("User not found with username: " + username));
+        log.info("Retrieved user correctly");
+
+        return user;
     }
 }
