@@ -7,6 +7,7 @@ import org.u2g.codylab.teamboard.dto.CardRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.CardResponseApiDTO;
 import org.u2g.codylab.teamboard.entity.Card;
 import org.u2g.codylab.teamboard.entity.Column;
+import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.mapper.CardMapper;
 import org.u2g.codylab.teamboard.repository.CardRepository;
@@ -29,14 +30,14 @@ public class CardService {
     }
 
     public CardResponseApiDTO createCard(CardRequestApiDTO cardRequestApiDTO) {
-        Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
+        Column project = columnRepository.findById(cardRequestApiDTO.getColumnId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         User user = userRepository.findById(cardRequestApiDTO.getAssignedTo())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         Card card = cardMapper.toEntity(cardRequestApiDTO);
-        card.setColumn(column);
+        card.setColumn(project);
         card.setAssignedTo(user);
         Card saved = cardRepository.save(card);
         return cardMapper.toResponse(saved);
@@ -48,36 +49,5 @@ public class CardService {
         }
         cardRepository.deleteById(id);
         return null;
-    }
-
-    // Homework — GET /card/{id}
-    public CardResponseApiDTO getCardById(Long id) {
-        Card card = cardRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return cardMapper.toResponse(card);
-    }
-
-    // Homework — PUT /card/{id}
-    public CardResponseApiDTO updateCardById(Long id, CardRequestApiDTO cardRequestApiDTO) {
-        Card card = cardRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        card.setTitle(cardRequestApiDTO.getTitle());
-        card.setDescription(cardRequestApiDTO.getDescription());
-
-        if (cardRequestApiDTO.getColumnId() != null) {
-            Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-            card.setColumn(column);
-        }
-
-        if (cardRequestApiDTO.getAssignedTo() != null) {
-            User user = userRepository.findById(cardRequestApiDTO.getAssignedTo())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-            card.setAssignedTo(user);
-        }
-
-        Card updated = cardRepository.save(card);
-        return cardMapper.toResponse(updated);
     }
 }

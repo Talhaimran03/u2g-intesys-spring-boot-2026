@@ -48,11 +48,6 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> logout() {
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
     public ResponseEntity<Me200ResponseApiDTO> me() {
 
         Me200ResponseApiDTO username = userService.me();
