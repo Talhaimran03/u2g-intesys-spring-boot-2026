@@ -216,4 +216,28 @@ class CardServiceTest {
         // Act & Assert
         assertThrows(CustomNotFoundException.class, () -> cardService.updateCardById(1L, request));
     }
+    @Test
+    void shouldUpdateOnlyColumnIdWhenTitleIsNull() {
+        // Arrange
+        Card card = new Card().setId(1L).setTitle("My Card");
+        Column column = new Column().setId(2L).setTitle("Done");
+
+        UpdateCardRequestApiDTO request = new UpdateCardRequestApiDTO()
+                .columnId(2L); // seulement columnId, pas de title
+
+        when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
+        when(columnRepository.findById(2L)).thenReturn(Optional.of(column));
+        when(cardRepository.save(any(Card.class))).thenReturn(card);
+        when(cardMapper.toResponse(any(Card.class)))
+                .thenReturn(new CardApiDTO().id(1L).title("My Card"));
+
+        // Act
+        CardApiDTO result = cardService.updateCardById(1L, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("My Card", result.getTitle());
+        verify(cardRepository).save(any(Card.class));
+        verify(userRepository, never()).findById(any());
+    }
 }

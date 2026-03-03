@@ -72,8 +72,13 @@ public class CardService {
         log.info("Updating card: {}", id);
         Card card = cardRepository.findById(id)
                 .orElseThrow(() -> new CustomNotFoundException("card not found with id: " + id));
-        card.setTitle(cardRequestApiDTO.getTitle());
-        card.setDescription(cardRequestApiDTO.getDescription());
+
+        if (cardRequestApiDTO.getTitle() != null) {
+            card.setTitle(cardRequestApiDTO.getTitle());
+        }
+        if (cardRequestApiDTO.getDescription() != null) {
+            card.setDescription(cardRequestApiDTO.getDescription());
+        }
         if (cardRequestApiDTO.getAssignedToId() != null) {
             User user = userRepository.findById(cardRequestApiDTO.getAssignedToId())
                     .orElseThrow(() -> new CustomNotFoundException("user not found with id: " + cardRequestApiDTO.getAssignedToId()));
@@ -84,6 +89,7 @@ public class CardService {
                     .orElseThrow(() -> new CustomNotFoundException("column not found with id: " + cardRequestApiDTO.getColumnId()));
             card.setColumn(column);
         }
+
         Card updated = cardRepository.save(card);
         log.info("Updated card: {}", updated);
         return cardMapper.toResponse(updated);
