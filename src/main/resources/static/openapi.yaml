@@ -5,7 +5,8 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8080/api
+  POST http://localhost:8080/api/register
+  POST http://localhost:8080/api/login
 
 tags:
   - name: Auth
