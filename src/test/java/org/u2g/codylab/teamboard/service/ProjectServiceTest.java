@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.u2g.codylab.teamboard.dto.CreateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
+import org.u2g.codylab.teamboard.dto.UpdateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.exception.CustomForbiddenException;
@@ -116,6 +117,46 @@ class ProjectServiceTest {
         try (MockedStatic<SecurityContextHolder> ignored = mockAuthAndUserRepo()) {
             assertThrows(CustomForbiddenException.class, () -> projectService.deleteProjectById(1L));
         }
+    }
+
+    @Test
+    void shouldUpdateProjectByIdSuccessfully() {
+        // Arrange
+        Project project = new Project().setId(1L).setTitle("Old Title").setDescription("Old Desc");
+
+        UpdateProjectRequestApiDTO request = new UpdateProjectRequestApiDTO()
+                .title("New Title")
+                .description("New Description");
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class)))
+                .thenReturn(new Project().setId(1L).setTitle("New Title").setDescription("New Description"));
+        when(projectMapper.toApiDTO(any(Project.class)))
+                .thenReturn(new ProjectResponseApiDTO().id(1L).title("New Title").description("New Description"));
+
+        // Act
+        ProjectResponseApiDTO result = projectService.updateProjectById(1L, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("New Title", result.getTitle());
+        assertEquals("New Description", result.getDescription());
+        verify(projectRepository).save(any(Project.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProjectNotFoundOnUpdate() {
+        // Arrange
+        UpdateProjectRequestApiDTO request = new UpdateProjectRequestApiDTO()
+                .title("New Title")
+                .description("New Description");
+
+        when(projectRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(CustomNotFoundException.class,
+                () -> projectService.updateProjectById(99L, request));
+        verify(projectRepository, never()).save(any());
     }
 
     MockedStatic<SecurityContextHolder> mockAuthAndUserRepo() {
