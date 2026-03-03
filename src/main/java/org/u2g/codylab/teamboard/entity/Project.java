@@ -1,6 +1,8 @@
 package org.u2g.codylab.teamboard.entity;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,10 +35,6 @@ public class Project {
     )
     private List<User> members = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private User createdBy;
-
     @jakarta.persistence.Column(name = "created_at")
     private java.time.LocalDateTime createdAt;
 
@@ -47,67 +45,71 @@ public class Project {
         return this.id;
     }
 
-    public void setId(Long id) {
+    public Project setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public Project setTitle(String title) {
         this.title = title;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public Project setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public User getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public Project setOwner(User owner) {
         this.owner = owner;
+        return this;
     }
 
     public List<Column> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<Column> columns) {
+    public Project setColumns(List<Column> columns) {
         this.columns = columns;
+        return this;
     }
 
     public List<User> getMembers() {
         return members;
     }
 
-    public void setMembers(List<User> members) {
+    public Project setMembers(List<User> members) {
         this.members = members;
+        return this;
     }
 
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public java.time.LocalDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+    public Project setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+        return this;
     }
 
-    public java.time.LocalDateTime getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+    public Project setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+        return this;
     }
 }

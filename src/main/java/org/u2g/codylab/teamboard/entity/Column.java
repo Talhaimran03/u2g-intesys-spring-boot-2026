@@ -2,6 +2,8 @@ package org.u2g.codylab.teamboard.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "columns")
 public class Column {
@@ -22,12 +24,48 @@ public class Column {
     @OneToMany(mappedBy = "column", cascade = CascadeType.ALL)
     private java.util.List<Card> cards = new java.util.ArrayList<>();
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public Integer getPosition() { return position; }
-    public void setPosition(Integer position) { this.position = position; }
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
+    public Long getId() {
+        return id;
+    }
+
+    public Column setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Column setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public Column setPosition(Integer position) {
+        this.position = position;
+        return this;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public Column setProject(Project project) {
+        this.project = project;
+        return this;
+    }
+
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public Column setCards(List<Card> cards) {
+        this.cards = cards;
+        return this;
+    }
 }
