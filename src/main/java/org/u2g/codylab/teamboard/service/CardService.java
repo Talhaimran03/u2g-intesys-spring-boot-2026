@@ -1,16 +1,15 @@
 package org.u2g.codylab.teamboard.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import org.u2g.codylab.teamboard.dto.CreateCardRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.CardApiDTO;
 import org.u2g.codylab.teamboard.dto.UpdateCardRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.Card;
 import org.u2g.codylab.teamboard.entity.Column;
 import org.u2g.codylab.teamboard.entity.User;
+import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
 import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.CardMapper;
 import org.u2g.codylab.teamboard.repository.CardRepository;
