@@ -21,6 +21,7 @@ import org.u2g.codylab.teamboard.repository.ProjectRepository;
 import org.u2g.codylab.teamboard.repository.UserRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -67,7 +68,17 @@ public class ProjectService {
         log.info("Adding project: {}", project);
 
         Project projectEntity = projectMapper.toEntity(project);
+        if (project.getMembers() != null && !project.getMembers().isEmpty()) {
+            List<User> members = project.getMembers().stream()
+                .map(userId -> userRepository.findById(userId)
+                    .orElseThrow(() -> new CustomNotFoundException("Member not found with id: " + userId)))
+                .toList();
+            projectEntity.setMembers(members);
+        }
         projectEntity.setOwner(getLoggedUser());
+        projectEntity.setCreatedAt(LocalDateTime.now());
+        projectEntity.setUpdatedAt(LocalDateTime.now());
+
         Project savedProject = projectRepository.save(projectEntity);
         ProjectResponseApiDTO projectResponseApiDTO = projectMapper.toApiDTO(savedProject);
 
@@ -110,6 +121,7 @@ public class ProjectService {
 
         project.setTitle(projectRequestApiDTO.getTitle());
         project.setDescription(projectRequestApiDTO.getDescription());
+        project.setUpdatedAt(LocalDateTime.now());
         Project updatedProject = projectRepository.save(project);
         ProjectResponseApiDTO projectResponseApiDTO = projectMapper.toApiDTO(updatedProject);
 

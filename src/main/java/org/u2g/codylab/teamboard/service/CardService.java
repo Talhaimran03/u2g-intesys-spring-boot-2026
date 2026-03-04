@@ -73,8 +73,14 @@ public class CardService {
         if (cardRequestApiDTO.getTitle() == null || cardRequestApiDTO.getTitle().isBlank()) {
             throw new CustomIllegalArgumentException("Title is required");
         }
-        card.setTitle(cardRequestApiDTO.getTitle());
-        card.setDescription(cardRequestApiDTO.getDescription());
+
+        if (cardRequestApiDTO.getTitle() != null) {
+            card.setTitle(cardRequestApiDTO.getTitle());
+        }
+        if (cardRequestApiDTO.getDescription() != null) {
+            card.setDescription(cardRequestApiDTO.getDescription());
+        }
+
         if (cardRequestApiDTO.getAssignedToId() != null) {
             User user = userRepository.findById(cardRequestApiDTO.getAssignedToId())
                     .orElseThrow(() -> new CustomNotFoundException("User not found"));
@@ -85,6 +91,7 @@ public class CardService {
                     .orElseThrow(() -> new CustomNotFoundException("Column not found"));
             card.setColumn(column);
         }
+
         Card updated = cardRepository.save(card);
         log.info("Card updated: {}", updated.getId());
         return cardMapper.toResponse(updated);
