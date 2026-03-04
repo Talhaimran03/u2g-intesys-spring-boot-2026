@@ -20,6 +20,7 @@ import org.u2g.codylab.teamboard.mapper.ProjectMapper;
 import org.u2g.codylab.teamboard.repository.ProjectRepository;
 import org.u2g.codylab.teamboard.repository.UserRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,10 +46,19 @@ public class ProjectService {
         User loggedInUser = getLoggedUser();
 
         Page<Project> projectPage = projectRepository.findProjectByOwner(loggedInUser, pageData);
-        List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream().map(projectMapper::toApiDTO).toList();
+
+        List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream()
+            .map(project -> {
+                ProjectResponseApiDTO dto = projectMapper.toApiDTO(project);
+                long cardsCount = project.getColumns() == null ? 0L : (long) project.getColumns().size();
+                dto.setCardsNumber(BigDecimal.valueOf(cardsCount));
+                return dto;
+            })
+            .toList();
+
         Page<ProjectResponseApiDTO> responseApiDTOS = new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
 
-        log.info("Retrieved {} projects", responseApiDTOS.getPageable().getPageSize());
+        log.info("Retrieved {} projects", responseApiDTOS.getContent().size());
         return responseApiDTOS;
 
     }
