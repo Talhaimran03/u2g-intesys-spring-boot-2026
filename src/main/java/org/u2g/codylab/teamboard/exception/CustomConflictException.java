@@ -1,12 +1,20 @@
 package org.u2g.codylab.teamboard.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.u2g.codylab.teamboard.dto.ErrorResponseApiDTO;
 
-@ResponseStatus(HttpStatus.CONFLICT)
-public class CustomConflictException extends RuntimeException {
+import java.time.OffsetDateTime;
+
+public class CustomConflictException extends ErrorResponseException {
 
     public CustomConflictException(String message) {
-        super(message);
+        super(asErrorResponseApiDTO(message));
+    }
+
+    private static ErrorResponseApiDTO asErrorResponseApiDTO(String message) {
+        return new ErrorResponseApiDTO()
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .message(message);
     }
 }
