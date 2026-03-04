@@ -20,6 +20,8 @@ import org.u2g.codylab.teamboard.mapper.ProjectMapper;
 import org.u2g.codylab.teamboard.repository.ProjectRepository;
 import org.u2g.codylab.teamboard.repository.UserRepository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,10 +47,19 @@ public class ProjectService {
         User loggedInUser = getLoggedUser();
 
         Page<Project> projectPage = projectRepository.findProjectByOwner(loggedInUser, pageData);
-        List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream().map(projectMapper::toApiDTO).toList();
+
+        List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream()
+            .map(project -> {
+                ProjectResponseApiDTO dto = projectMapper.toApiDTO(project);
+                long cardsCount = project.getColumns() == null ? 0L : (long) project.getColumns().size();
+                dto.setCardsNumber(BigDecimal.valueOf(cardsCount));
+                return dto;
+            })
+            .toList();
+
         Page<ProjectResponseApiDTO> responseApiDTOS = new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
 
-        log.info("Retrieved {} projects", responseApiDTOS.getPageable().getPageSize());
+        log.info("Retrieved {} projects", responseApiDTOS.getContent().size());
         return responseApiDTOS;
 
     }
@@ -57,7 +68,17 @@ public class ProjectService {
         log.info("Adding project: {}", project);
 
         Project projectEntity = projectMapper.toEntity(project);
+        if (project.getMembers() != null && !project.getMembers().isEmpty()) {
+            List<User> members = project.getMembers().stream()
+                .map(userId -> userRepository.findById(userId)
+                    .orElseThrow(() -> new CustomNotFoundException("Member not found with id: " + userId)))
+                .toList();
+            projectEntity.setMembers(members);
+        }
         projectEntity.setOwner(getLoggedUser());
+        projectEntity.setCreatedAt(LocalDateTime.now());
+        projectEntity.setUpdatedAt(LocalDateTime.now());
+
         Project savedProject = projectRepository.save(projectEntity);
         ProjectResponseApiDTO projectResponseApiDTO = projectMapper.toApiDTO(savedProject);
 
@@ -100,6 +121,7 @@ public class ProjectService {
 
         project.setTitle(projectRequestApiDTO.getTitle());
         project.setDescription(projectRequestApiDTO.getDescription());
+        project.setUpdatedAt(LocalDateTime.now());
         Project updatedProject = projectRepository.save(project);
         ProjectResponseApiDTO projectResponseApiDTO = projectMapper.toApiDTO(updatedProject);
 
