@@ -21,6 +21,12 @@ import java.util.Optional;
 @Service
 public class UserService {
 
+    // Username validation: only letters, numbers, and underscores are allowed
+    private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]+$";
+
+    // Password validation: at least 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
+    private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -32,20 +38,30 @@ public class UserService {
     }
 
     public ResponseEntity<Void> register(RegisterRequestApiDTO registerRequestApiDTO) {
+
         log.info("Registering user: {}", registerRequestApiDTO.getUsername());
-        if (registerRequestApiDTO.getUsername() == null || registerRequestApiDTO.getUsername().isBlank() ||
-                registerRequestApiDTO.getPassword() == null || registerRequestApiDTO.getPassword().isBlank()) {
+        String username = registerRequestApiDTO.getUsername();
+        String password = registerRequestApiDTO.getPassword();
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new CustomIllegalArgumentException("Username and password are required");
         }
-        if (userRepository.findByUsername(registerRequestApiDTO.getUsername()).isPresent()) {
+
+        username = username.trim();
+        if (!username.matches(USERNAME_REGEX)) {
+            throw new CustomIllegalArgumentException("Username must not contain special characters");
+        }
+        if (userRepository.findByUsername(username).isPresent()) {
             throw new CustomConflictException("Username already exists");
         }
-        registerRequestApiDTO.setPassword(passwordEncoder.encode(registerRequestApiDTO.getPassword()));
 
+        if (!password.matches(PASSWORD_REGEX)) {
+            throw new CustomIllegalArgumentException("Password is too weak: must be at least 8 characters, contain upper and lower case, a number and a special character");
+        }
+        registerRequestApiDTO.setUsername(username);
+        registerRequestApiDTO.setPassword(passwordEncoder.encode(password));
         User userEntity = userMapper.toEntity(registerRequestApiDTO);
         userRepository.save(userEntity);
-        log.info("User registered: {}", registerRequestApiDTO.getUsername());
-
+        log.info("User registered: {}", username);
         return ResponseEntity.ok().build();
     }
 
