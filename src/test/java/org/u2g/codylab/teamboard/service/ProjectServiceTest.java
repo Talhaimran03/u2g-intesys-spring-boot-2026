@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.u2g.codylab.teamboard.dto.CreateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
+import org.u2g.codylab.teamboard.dto.UpdateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.exception.CustomForbiddenException;
@@ -135,5 +136,64 @@ class ProjectServiceTest {
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         return mockedSecurityContextHolder;
     }
+    @Test
+    void shouldUpdateProjectSuccessfully() {
+
+        Long projectId = 1L;
+
+        Project existingProject = new Project()
+                .setId(projectId)
+                .setTitle("Old Title")
+                .setDescription("Old Description");
+
+        UpdateProjectRequestApiDTO request = new UpdateProjectRequestApiDTO()
+                .title("New Title")
+                .description("New Description");
+
+        Project updatedProject = new Project()
+                .setId(projectId)
+                .setTitle("New Title")
+                .setDescription("New Description");
+
+        ProjectResponseApiDTO responseDTO = new ProjectResponseApiDTO()
+                .id(projectId)
+                .title("New Title")
+                .description("New Description");
+
+        when(projectRepository.findById(projectId))
+                .thenReturn(Optional.of(existingProject));
+
+        when(projectRepository.save(existingProject))
+                .thenReturn(updatedProject);
+
+        when(projectMapper.toApiDTO(updatedProject))
+                .thenReturn(responseDTO);
+
+        ProjectResponseApiDTO result =
+                projectService.updateProjectById(projectId, request);
+
+        assertNotNull(result);
+        assertEquals("New Title", result.getTitle());
+        assertEquals("New Description", result.getDescription());
+
+        verify(projectRepository).findById(projectId);
+        verify(projectRepository).save(existingProject);
+        verify(projectMapper).toApiDTO(updatedProject);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdatingNonExistingProject() {
+
+        when(projectRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(CustomNotFoundException.class, () ->
+                projectService.updateProjectById(1L,
+                        new UpdateProjectRequestApiDTO()));
+
+        verify(projectRepository).findById(1L);
+        verify(projectRepository, never()).save(any());
+    }
+
 
 }
