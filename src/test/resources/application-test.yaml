@@ -1,16 +1,19 @@
 spring:
   application:
     name: teamboard
-  profiles:
-    active: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/teamboard
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
     username:
     password:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
+
+jwt:
+  secret: test
+  expiration: 604800000
 
 server:
   base-path: /api
