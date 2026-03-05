@@ -10,6 +10,7 @@ import org.u2g.codylab.teamboard.dto.RegisterRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.exception.CustomAnauthorizedException;
 import org.u2g.codylab.teamboard.exception.CustomConflictException;
+import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
 import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.UserMapper;
 import org.u2g.codylab.teamboard.repository.UserRepository;
@@ -33,6 +34,10 @@ public class UserService {
 
     public ResponseEntity<Void> register(RegisterRequestApiDTO registerRequestApiDTO) {
         log.info("Registering user: {}", registerRequestApiDTO);
+        if (!registerRequestApiDTO.getUsername().matches("^[a-zA-Z0-9_-]+$")) {
+            throw new CustomIllegalArgumentException("Username contains invalid characters: " + registerRequestApiDTO.getUsername());
+        }
+
         if (userRepository.findByUsername(registerRequestApiDTO.getUsername()).isPresent()) {
             log.info("Username is already in use: {}", registerRequestApiDTO.getUsername());
             throw new CustomConflictException("Username is already in use: " + registerRequestApiDTO.getUsername());

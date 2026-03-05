@@ -84,27 +84,25 @@ class ProjectIntegrationTest {
         @Test
         void shouldCreateProjectWithMembers() throws Exception {
             User user1 = new User()
-                    .setId(6L)
                     .setUsername("user1")
                     .setPassword("wef7429")
                     .setEmail("user1@gmail.com")
                     .setName("Test")
                     .setSurname("User");
-            userRepository.save(user1);
+            Long user1Id = userRepository.save(user1).getId();
 
             User user2 = new User()
-                    .setId(7L)
                     .setUsername("user2")
                     .setPassword("wef7429")
                     .setEmail("user2@gmail.com")
                     .setName("Test")
                     .setSurname("User");
-            userRepository.save(user2);
+            Long user2Id = userRepository.save(user2).getId();
 
             CreateProjectRequestApiDTO dto = new CreateProjectRequestApiDTO()
                     .title("Demo members")
                     .description("Description")
-                    .members(List.of(user1.getId(), user2.getId()));
+                    .members(List.of(user1Id, user2Id));
 
             mockMvc.perform(post(BASE_URL)
                             .contentType(MediaType.APPLICATION_JSON)
