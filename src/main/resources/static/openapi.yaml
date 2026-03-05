@@ -93,7 +93,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   /personal-data:
-    put:
+    patch:
       operationId: updatePersonalData
       tags: [User]
       summary: Update personal data
@@ -142,7 +142,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   /user-data:
-    put:
+    patch:
       operationId: updateUsername
       tags: [User]
       summary: Update username
@@ -191,7 +191,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   /update-password:
-    put:
+    patch:
       operationId: updatePassword
       tags: [User]
       summary: Update password
