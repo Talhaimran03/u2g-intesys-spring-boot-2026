@@ -28,39 +28,44 @@ public class Card {
         return id;
     }
 
-    public void setId(Long id) {
+    public Card setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public Card setTitle(String title) {
         this.title = title;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public Card setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public User getAssignedTo() {
         return assignedTo;
     }
 
-    public void setAssignedTo(User assignedTo) {
+    public Card setAssignedTo(User assignedTo) {
         this.assignedTo = assignedTo;
+        return this;
     }
 
     public Column getColumn() {
         return column;
     }
 
-    public void setColumn(Column column) {
+    public Card setColumn(Column column) {
         this.column = column;
+        return this;
     }
 }

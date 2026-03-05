@@ -14,7 +14,6 @@ import org.u2g.codylab.teamboard.entity.Project;
 public interface ProjectMapper {
 
     @Mapping(target = "createdBy", source = "owner")
-    @Mapping(target = "members", source = "members")
     @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "localDateTimeToOffsetDateTime")
     @Mapping(target = "updatedAt", source = "updatedAt", qualifiedByName = "localDateTimeToOffsetDateTime")
     ProjectResponseApiDTO toApiDTO(Project project);

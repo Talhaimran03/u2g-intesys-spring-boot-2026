@@ -1,6 +1,7 @@
 package org.u2g.codylab.teamboard.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -20,6 +21,9 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    @Value("${server.base-path}")
+    private String basePath;
+
     @Autowired
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -37,7 +41,7 @@ public class SecurityConfig {
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/register", "/user/login").permitAll()
+                        .requestMatchers(basePath + "/register", basePath + "/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
