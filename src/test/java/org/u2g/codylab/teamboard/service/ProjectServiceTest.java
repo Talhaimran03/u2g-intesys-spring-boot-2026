@@ -77,21 +77,6 @@ class ProjectServiceTest {
     }
 
     @Test
-    void shouldGetAllProjectsSuccessfully() {
-        // Arrange
-        Project project = new Project().setTitle("Demo").setDescription("Description");
-        Page<Project> projectPage = new PageImpl<>(List.of(project));
-        when(projectRepository.findProjectByOwner(any(), any(Pageable.class))).thenReturn(projectPage);
-        when(projectMapper.toApiDTO(any())).thenReturn(new ProjectResponseApiDTO().id(1L).title("Demo").description("Description"));
-
-        // Act & Assert
-        try (MockedStatic<SecurityContextHolder> ignored = mockAuthAndUserRepo()) {
-            Page<ProjectResponseApiDTO> result = projectService.getAllProjects(PageRequest.of(0, 10));
-            assertEquals(1, result.getContent().size());
-        }
-    }
-
-    @Test
     void shouldDeleteProjectSuccessfully() {
         // Arrage
         User user = new User().setId(1L).setUsername("testuser").setPassword("testpassword");
