@@ -41,7 +41,7 @@ public class ProjectController implements ProjectApi {
     @Override
     public ResponseEntity<ProjectResponseApiDTO> createProject(CreateProjectRequestApiDTO projectApiDTO) {
         ProjectResponseApiDTO response = projectService.addProject(projectApiDTO);
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Override

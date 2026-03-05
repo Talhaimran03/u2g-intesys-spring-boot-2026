@@ -33,6 +33,7 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<Void> register(RegisterRequestApiDTO registerRequestApiDTO) {
-        return userService.register(registerRequestApiDTO);
+        userService.register(registerRequestApiDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

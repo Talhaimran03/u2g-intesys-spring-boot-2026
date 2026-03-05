@@ -1,5 +1,6 @@
 package org.u2g.codylab.teamboard.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.api.ColumnApi;
@@ -34,7 +35,7 @@ public class ColumnController implements ColumnApi {
     @Override
     public ResponseEntity<ColumnResponseApiDTO> createColumn(CreateColumnRequestApiDTO request) {
         ColumnResponseApiDTO response = columnService.create(request);
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Override
