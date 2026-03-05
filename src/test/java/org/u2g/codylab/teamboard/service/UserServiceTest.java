@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.RegisterRequestApiDTO;
@@ -43,13 +42,17 @@ class UserServiceTest {
         dto.setUsername("test");
         dto.setPassword("Password@123");
 
-        when(userRepository.findByUsername("test")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("Password@123")).thenReturn("encoded");
-        when(userMapper.toEntity(dto)).thenReturn(new User());
+        when(userRepository.findByUsername("test"))
+                .thenReturn(Optional.empty());
 
-        ResponseEntity<Void> response = userService.register(dto);
+        when(passwordEncoder.encode("Password@123"))
+                .thenReturn("encoded");
 
-        assertEquals(200, response.getStatusCode().value());
+        when(userMapper.toEntity(dto))
+                .thenReturn(new User());
+
+        assertDoesNotThrow(() -> userService.register(dto));
+
         verify(userRepository).save(any(User.class));
     }
 
@@ -65,7 +68,6 @@ class UserServiceTest {
         assertThrows(CustomConflictException.class,
                 () -> userService.register(dto));
     }
-
 
     @Test
     void shouldLoginSuccessfully() {
@@ -152,7 +154,8 @@ class UserServiceTest {
     @Test
     void shouldDeleteUserSuccessfully() {
 
-        when(userRepository.existsById(1L)).thenReturn(true);
+        when(userRepository.existsById(1L))
+                .thenReturn(true);
 
         userService.deleteUserById(1L);
 
@@ -162,7 +165,8 @@ class UserServiceTest {
     @Test
     void shouldThrowWhenDeletingNonExistingUser() {
 
-        when(userRepository.existsById(1L)).thenReturn(false);
+        when(userRepository.existsById(1L))
+                .thenReturn(false);
 
         assertThrows(CustomNotFoundException.class,
                 () -> userService.deleteUserById(1L));

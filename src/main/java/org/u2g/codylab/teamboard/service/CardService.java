@@ -1,6 +1,8 @@
 package org.u2g.codylab.teamboard.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.u2g.codylab.teamboard.dto.CreateCardRequestApiDTO;
@@ -35,18 +37,26 @@ public class CardService {
 
     public CardApiDTO createCard(CreateCardRequestApiDTO cardRequestApiDTO) {
         log.info("Creating card: {}", cardRequestApiDTO);
-        Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
-                .orElseThrow(() -> new CustomNotFoundException("column not found with id: " + cardRequestApiDTO.getColumnId()));
 
-        User user = userRepository.findById(cardRequestApiDTO.getAssignedToId())
-                .orElseThrow(() -> new CustomNotFoundException("user not found with id: " + cardRequestApiDTO.getAssignedToId()));
+        Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
+                .orElseThrow(() -> new CustomNotFoundException(
+                        "column not found with id: " + cardRequestApiDTO.getColumnId()));
+
+        // 🔥 récupérer utilisateur connecté
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new CustomNotFoundException("Authenticated user not found"));
 
         Card card = cardMapper.toEntity(cardRequestApiDTO);
+
         card.setColumn(column);
-        card.setAssignedTo(user);
+        card.setAssignedTo(user); // jamais null
+
         Card saved = cardRepository.save(card);
 
         log.info("Saved card: {}", saved);
+
         return cardMapper.toResponse(saved);
     }
 
