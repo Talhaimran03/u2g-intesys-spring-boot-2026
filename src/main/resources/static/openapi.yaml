@@ -514,7 +514,101 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
+  /project/{id}/members:
+    get:
+      operationId: getProjectMembers
+      tags: [Project]
+      summary: Get members of a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '404':
+          description: Project not found
+    post:
+      operationId: addProjectMembers
+      tags: [Project]
+      summary: Add a list of members to a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+                format: int64
+                description: User ID
+      responses:
+        '200':
+          description: Members added
+        '404':
+          description: Project or user not found
+  /project/{id}/members/{userId}:
+    delete:
+      operationId: removeProjectMember
+      tags: [Project]
+      summary: Remove a member from a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Member removed
+        '404':
+          description: Project or user not found
+  /project/{id}/columns:
+    get:
+      operationId: getProjectColumns
+      tags: [Project]
+      summary: Get columns of a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of columns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ColumnResponse'
+        '404':
+          description: Project not found
   /column:
     get:
       operationId: getAllColumns
@@ -921,17 +1015,14 @@ components:
   headers:
     X-Total-Count:
       schema:
-        format: int32
         type: integer
       description: Total amount of elements for this query
     X-Page-Number:
       schema:
-        format: int32
         type: integer
       description: Page number starting from 0
     X-Page-Size:
       schema:
-        format: int32
         type: integer
       description: Page size
 
@@ -968,7 +1059,6 @@ components:
       name: page
       description: Page number
       schema:
-        format: int32
         default: 0
         type: integer
       in: query
@@ -977,8 +1067,6 @@ components:
       name: size
       description: Page size
       schema:
-        format: int32
-        default: 10
         type: integer
       in: query
       required: false
@@ -1133,15 +1221,6 @@ components:
           type: string
         description:
           type: string
-        members:
-          type: array
-          items:
-            type: integer
-            format: int64
-        columns:
-          type: array
-          items:
-            $ref: '#/components/schemas/Column'
 
     ProjectResponse:
       type: object
@@ -1159,7 +1238,6 @@ components:
             $ref: '#/components/schemas/User'
         cardsNumber:
           type: number
-          format: int32
         createdBy:
           $ref: '#/components/schemas/User'
         createdAt:
@@ -1225,9 +1303,8 @@ components:
           type: string
         assignedTo:
           $ref: '#/components/schemas/User'
-        columnId:
-          type: integer
-          format: int64
+        column:
+          $ref: '#/components/schemas/Column'
 
     CreateCardRequest:
       type: object
@@ -1270,3 +1347,4 @@ components:
           type: integer
         message:
           type: string
+

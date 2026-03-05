@@ -6,9 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.u2g.codylab.teamboard.api.ProjectApi;
-import org.u2g.codylab.teamboard.dto.CreateProjectRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
-import org.u2g.codylab.teamboard.dto.UpdateProjectRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.*;
 import org.u2g.codylab.teamboard.service.ProjectService;
 import org.u2g.codylab.teamboard.util.PageUtils;
 
@@ -61,4 +59,29 @@ public class ProjectController implements ProjectApi {
         ProjectResponseApiDTO response = projectService.updateProjectById(id, updateProjectRequestApiDTO);
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    public ResponseEntity<List<UserApiDTO>> getProjectMembers(Long id) {
+        List<UserApiDTO> members = projectService.getProjectMembers(id);
+        return ResponseEntity.ok(members);
+    }
+
+    @Override
+    public ResponseEntity<Void> addProjectMembers(Long id, List<Long> userIds) {
+        projectService.addProjectMembers(id, userIds);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> removeProjectMember(Long id, Long userId) {
+        projectService.removeProjectMember(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<List<ColumnResponseApiDTO>> getProjectColumns(Long id) {
+        List<ColumnResponseApiDTO> columns = projectService.getProjectColumns(id);
+        return ResponseEntity.ok(columns);
+    }
+
 }
