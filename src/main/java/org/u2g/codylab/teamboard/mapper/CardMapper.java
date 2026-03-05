@@ -11,7 +11,7 @@ import org.u2g.codylab.teamboard.entity.Card;
 public interface CardMapper {
 
     @Mapping(target = "assignedTo", ignore = true)
-    @Mapping(target = "columnId", ignore = true)
+    @Mapping(target = "column", ignore = true)
     CardApiDTO toResponse(Card column);
 
     @Mapping(target = "assignedTo.id", source = "assignedToId")
