@@ -68,6 +68,8 @@ public class ProjectService {
         log.info("Adding project: {}", project);
 
         Project projectEntity = projectMapper.toEntity(project);
+        if (projectEntity.getColumns() != null)
+            projectEntity.getColumns().forEach(column -> column.setProject(projectEntity));
         if (project.getMembers() != null && !project.getMembers().isEmpty()) {
             List<User> members = project.getMembers().stream()
                 .map(userId -> userRepository.findById(userId)

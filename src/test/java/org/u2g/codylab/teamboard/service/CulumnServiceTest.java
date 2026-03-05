@@ -38,7 +38,7 @@ class ColumnServiceTest {
     @InjectMocks
     private ColumnService columnService;
 
-    // ─── GET ALL ─────────────────────────────────────────────
+
 
     @Test
     void shouldGetAllColumnsSuccessfully() {
@@ -58,7 +58,7 @@ class ColumnServiceTest {
         verify(columnRepository).findAll();
     }
 
-    // ─── GET BY ID ───────────────────────────────────────────
+
 
     @Test
     void shouldGetColumnByIdSuccessfully() {
