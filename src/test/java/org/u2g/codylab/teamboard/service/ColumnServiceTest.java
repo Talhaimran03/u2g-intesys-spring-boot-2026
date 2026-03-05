@@ -109,13 +109,13 @@ class ColumnServiceTest {
     }
 
     @Test
-    void shouldGetAllColumnsSuccessfully() {
+    void shouldGetColumnsByProjectIdColumnsSuccessfully() {
 
         // Arrange
         when(columnRepository.findAll()).thenReturn(List.of(new Column()));
         when(columnMapper.toResponse(any())).thenReturn(new ColumnResponseApiDTO());
 
         // Act & Assert
-        assertFalse(columnService.getAll().isEmpty());
+        assertFalse(columnService.getColumnsByProjectId(any()).isEmpty());
     }
 }

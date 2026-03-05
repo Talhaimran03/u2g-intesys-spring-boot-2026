@@ -30,9 +30,10 @@ public class ColumnService {
         this.columnMapper = columnMapper;
     }
 
-    public List<ColumnResponseApiDTO> getAll() {
+    public List<ColumnResponseApiDTO> getColumnsByProjectId(Long projectId) {
         log.info("Getting all columns");
-        return columnRepository.findAll().stream().map(columnMapper::toResponse).toList();
+        List<Column> columns = columnRepository.findByProjectId(projectId);
+        return columns.stream().map(columnMapper::toResponse).toList();
     }
 
     public ColumnResponseApiDTO getById(Long id) {

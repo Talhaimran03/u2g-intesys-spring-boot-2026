@@ -10,9 +10,8 @@ import org.u2g.codylab.teamboard.entity.Card;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CardMapper {
 
-    @Mapping(target = "assignedTo", ignore = true)
-    @Mapping(target = "column", ignore = true)
-    CardApiDTO toResponse(Card column);
+    @Mapping(target = "columnId", source = "column.id")
+    CardApiDTO toResponse(Card card);
 
     @Mapping(target = "assignedTo.id", source = "assignedToId")
     @Mapping(target = "column.id", source = "columnId")

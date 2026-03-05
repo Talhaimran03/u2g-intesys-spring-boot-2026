@@ -609,14 +609,21 @@ paths:
                   $ref: '#/components/schemas/ColumnResponse'
         '404':
           description: Project not found
-  /column:
+  /column/project/{id}:
     get:
-      operationId: getAllColumns
-      tags: [Column]
-      summary: Get all columns
+      operationId: getColumnsByProjectId
+      tags: [ Column ]
+      summary: Get columns by project id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
-          description: List of columns
+          description: List of columns of a project
           content:
             application/json:
               schema:
@@ -641,6 +648,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /column:
     post:
       operationId: createColumn
       tags: [Column]
@@ -1059,6 +1067,7 @@ components:
       name: page
       description: Page number
       schema:
+        format: int32
         default: 0
         type: integer
       in: query
@@ -1067,6 +1076,8 @@ components:
       name: size
       description: Page size
       schema:
+        format: int32
+        default: 10
         type: integer
       in: query
       required: false
@@ -1238,6 +1249,7 @@ components:
             $ref: '#/components/schemas/User'
         cardsNumber:
           type: number
+          format: int32
         createdBy:
           $ref: '#/components/schemas/User'
         createdAt:
@@ -1303,8 +1315,9 @@ components:
           type: string
         assignedTo:
           $ref: '#/components/schemas/User'
-        column:
-          $ref: '#/components/schemas/Column'
+        columnId:
+          type: integer
+          format: int64
 
     CreateCardRequest:
       type: object
