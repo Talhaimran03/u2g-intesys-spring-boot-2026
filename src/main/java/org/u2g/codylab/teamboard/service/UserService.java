@@ -120,7 +120,7 @@ public class UserService {
             return true;
         }
         log.warn("User not found for delete: {}", id);
-        throw new CustomNotFoundException("User not found");
+        throw new CustomIllegalArgumentException("User not found");
     }
 
     public Me200ResponseApiDTO me() {

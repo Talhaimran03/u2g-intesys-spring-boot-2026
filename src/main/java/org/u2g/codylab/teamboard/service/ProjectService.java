@@ -71,7 +71,7 @@ public class ProjectService {
         if (project.getMembers() != null && !project.getMembers().isEmpty()) {
             List<User> members = project.getMembers().stream()
                 .map(userId -> userRepository.findById(userId)
-                    .orElseThrow(() -> new CustomNotFoundException("Member not found with id: " + userId)))
+                    .orElseThrow(() -> new CustomIllegalArgumentException("Member not found with id: " + userId)))
                 .toList();
             projectEntity.setMembers(members);
         }
@@ -92,7 +92,7 @@ public class ProjectService {
 
         User loggedInUser = AuthUtil.getLoggedUser(userRepository);
 
-        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + id));
+        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + id));
 
         if (project.getOwner().getId().equals(loggedInUser.getId())) {
             projectRepository.deleteById(id);
@@ -117,7 +117,7 @@ public class ProjectService {
 
         log.info("Updating project with id: {}", id);
 
-        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + id));
+        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + id));
 
         project.setTitle(projectRequestApiDTO.getTitle());
         project.setDescription(projectRequestApiDTO.getDescription());
@@ -138,11 +138,11 @@ public class ProjectService {
 
     public void addProjectMembers(Long projectId, List<Long> userIds) {
         Project project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + projectId));
+            .orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + projectId));
 
         userIds.forEach(userId -> {
             User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new CustomIllegalArgumentException("User not found with id: " + userId));
             if (!project.getMembers().contains(user)) {
                 project.getMembers().add(user);
             } else {
@@ -155,9 +155,9 @@ public class ProjectService {
 
     public void removeProjectMember(Long projectId, Long userId) {
         Project project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + projectId));
+            .orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + projectId));
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new CustomNotFoundException("User not found with id: " + userId));
+            .orElseThrow(() -> new CustomIllegalArgumentException("User not found with id: " + userId));
 
         if (project.getMembers().contains(user)) {
             project.getMembers().remove(user);
@@ -169,7 +169,7 @@ public class ProjectService {
 
     public List<ColumnResponseApiDTO> getProjectColumns(Long projectId) {
         Project project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + projectId));
+            .orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + projectId));
         return project.getColumns().stream().map(columnMapper::toResponse).toList();
     }
 }

@@ -39,9 +39,9 @@ public class CardService {
             throw new CustomIllegalArgumentException("Title is required");
         }
         Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
-                .orElseThrow(() -> new CustomNotFoundException("Column not found"));
+                .orElseThrow(() -> new CustomIllegalArgumentException("Column not found"));
         User user = userRepository.findById(cardRequestApiDTO.getAssignedToId())
-                .orElseThrow(() -> new CustomNotFoundException("User not found"));
+                .orElseThrow(() -> new CustomIllegalArgumentException("User not found"));
         Card card = cardMapper.toEntity(cardRequestApiDTO);
         card.setColumn(column);
         card.setAssignedTo(user);
@@ -53,7 +53,7 @@ public class CardService {
     public void deleteCardById(Long id) {
         log.info("Deleting card with id: {}", id);
         if (!cardRepository.existsById(id)) {
-            throw new CustomNotFoundException("Card not found");
+            throw new CustomIllegalArgumentException("Card not found");
         }
         cardRepository.deleteById(id);
         log.info("Card deleted: {}", id);
@@ -69,7 +69,7 @@ public class CardService {
     public CardApiDTO updateCardById(Long id, UpdateCardRequestApiDTO cardRequestApiDTO) {
         log.info("Updating card with id: {}", id);
         Card card = cardRepository.findById(id)
-                .orElseThrow(() -> new CustomNotFoundException("Card not found"));
+                .orElseThrow(() -> new CustomIllegalArgumentException("Card not found"));
         if (cardRequestApiDTO.getTitle() == null || cardRequestApiDTO.getTitle().isBlank()) {
             throw new CustomIllegalArgumentException("Title is required");
         }
@@ -83,12 +83,12 @@ public class CardService {
 
         if (cardRequestApiDTO.getAssignedToId() != null) {
             User user = userRepository.findById(cardRequestApiDTO.getAssignedToId())
-                    .orElseThrow(() -> new CustomNotFoundException("User not found"));
+                    .orElseThrow(() -> new CustomIllegalArgumentException("User not found"));
             card.setAssignedTo(user);
         }
         if (cardRequestApiDTO.getColumnId() != null) {
             Column column = columnRepository.findById(cardRequestApiDTO.getColumnId())
-                    .orElseThrow(() -> new CustomNotFoundException("Column not found"));
+                    .orElseThrow(() -> new CustomIllegalArgumentException("Column not found"));
             card.setColumn(column);
         }
 
