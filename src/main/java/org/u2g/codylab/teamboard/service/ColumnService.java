@@ -32,6 +32,9 @@ public class ColumnService {
 
     public List<ColumnResponseApiDTO> getColumnsByProjectId(Long projectId) {
         log.info("Getting all columns");
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomNotFoundException("Project not found"));
+
         List<Column> columns = columnRepository.findByProjectId(projectId);
         return columns.stream().map(columnMapper::toResponse).toList();
     }
