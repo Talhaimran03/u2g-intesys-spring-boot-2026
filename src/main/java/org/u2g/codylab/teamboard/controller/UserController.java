@@ -18,34 +18,29 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<UserResponseApiDTO> updatePersonalData(UpdatePersonalDataRequestApiDTO updatePersonalDataRequestApiDTO) {
-        return ResponseEntity.ok(userService.updatePersonalData(updatePersonalDataRequestApiDTO));
+    public ResponseEntity<UserResponseApiDTO> updatePersonalDataUser(UpdatePersonalDataRequestApiDTO updatePersonalDataRequestApiDTO) {
+        return ResponseEntity.ok(userService.updatePersonalDataUser(updatePersonalDataRequestApiDTO));
     }
 
     @Override
     public ResponseEntity<UserResponseApiDTO> updateUsername(UpdateUsernameRequestApiDTO updateUsernameRequestApiDTO) {
-        return ResponseEntity.ok(userService.updateUsername(updateUsernameRequestApiDTO));
+        return ResponseEntity.ok(userService.updateUsernameData(updateUsernameRequestApiDTO));
     }
 
     @Override
     public ResponseEntity<Void> updatePassword(UpdatePasswordRequestApiDTO updatePasswordRequestApiDTO) {
-        userService.updatePassword(updatePasswordRequestApiDTO);
+        userService.updateUserPassword(updatePasswordRequestApiDTO);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> deleteUserById(Long userId) {
-        userService.deleteUserById(userId);
+    public ResponseEntity<Void> deleteUserById(Long id){
+        userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<Me200ResponseApiDTO> me() {
+    public ResponseEntity<Me200ResponseApiDTO> me(){
         return ResponseEntity.ok(userService.me());
-    }
-
-    @Override
-    public ResponseEntity<List<UserApiDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
     }
 }
