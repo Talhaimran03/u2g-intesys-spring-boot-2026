@@ -1,12 +1,12 @@
 package org.u2g.codylab.teamboard.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.RegisterRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.*;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.exception.CustomConflictException;
 import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
@@ -14,76 +14,86 @@ import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.UserMapper;
 import org.u2g.codylab.teamboard.repository.UserRepository;
 
-import java.util.Optional;
-
 @Slf4j
-@Transactional
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class UserService {
 
-    // Username validation: only letters, numbers, and underscores are allowed
     private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]+$";
-
-    // Password validation: at least 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.userMapper = userMapper;
+
+    public Me200ResponseApiDTO getCurrentUser() {
+        User user = getAuthenticatedUser();
+        Me200ResponseApiDTO response = new Me200ResponseApiDTO();
+        response.setUsername(user.getUsername());
+        return response;
     }
 
-    public ResponseEntity<Void> register(RegisterRequestApiDTO registerRequestApiDTO) {
 
-        log.info("Registering user: {}", registerRequestApiDTO.getUsername());
-        String username = registerRequestApiDTO.getUsername();
-        String password = registerRequestApiDTO.getPassword();
-        if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            throw new CustomIllegalArgumentException("Username and password are required");
-        }
+    public UserResponseApiDTO updatePersonalData(UpdatePersonalDataRequestApiDTO request) {
+        User user = getAuthenticatedUser();
 
-        username = username.trim();
-        if (!username.matches(USERNAME_REGEX)) {
-            throw new CustomIllegalArgumentException("Username must not contain special characters");
-        }
-        if (userRepository.findByUsername(username).isPresent()) {
-            throw new CustomConflictException("Username already exists");
-        }
+        user.setName(request.getName());
+        user.setSurname(request.getSurname());
+        user.setEmail(request.getEmail());
 
-        if (!password.matches(PASSWORD_REGEX)) {
-            throw new CustomIllegalArgumentException("Password is too weak: must be at least 8 characters, contain upper and lower case, a number and a special character");
-        }
-        registerRequestApiDTO.setUsername(username);
-        registerRequestApiDTO.setPassword(passwordEncoder.encode(password));
-        User userEntity = userMapper.toEntity(registerRequestApiDTO);
-        userRepository.save(userEntity);
-        log.info("User registered: {}", username);
-        return ResponseEntity.ok().build();
+        log.info("Mise à jour des données personnelles pour : {}", user.getUsername());
+        return userMapper.toDto(userRepository.save(user));
     }
 
-    public Optional<User> login(LoginRequestApiDTO loginRequest) {
-        log.info("Login attempt for user: {}", loginRequest.getUsername());
-        Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
-        if (userOpt.isPresent() && passwordEncoder.matches(loginRequest.getPassword(), userOpt.get().getPassword())) {
-            log.info("Login successful for user: {}", loginRequest.getUsername());
-            return userOpt;
+
+    public UserResponseApiDTO updateUsername(UpdateUsernameRequestApiDTO request) {
+        User user = getAuthenticatedUser();
+        String newUsername = request.getUsername().trim();
+
+
+        if (!newUsername.matches(USERNAME_REGEX)) {
+            throw new CustomIllegalArgumentException("Le format du pseudo est invalide");
         }
-        log.warn("Login failed for user: {}", loginRequest.getUsername());
-        return Optional.empty();
+
+
+        if (userRepository.findByUsername(newUsername).isPresent()) {
+            throw new CustomConflictException("Ce pseudo est déjà utilisé");
+        }
+
+        user.setUsername(newUsername);
+        return userMapper.toDto(userRepository.save(user));
     }
 
-    public boolean deleteUserById(Long id) {
-        log.info("Deleting user with id: {}", id);
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            log.info("User deleted: {}", id);
-            return true;
+
+    public void updatePassword(UpdatePasswordRequestApiDTO request) {
+        User user = getAuthenticatedUser();
+        String newPassword = request.getPassword();
+
+
+        if (!newPassword.matches(PASSWORD_REGEX)) {
+            throw new CustomIllegalArgumentException("Le mot de passe est trop faible");
         }
-        log.warn("User not found for delete: {}", id);
-        throw new CustomNotFoundException("User not found");
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        log.info("Mot de passe modifié avec succès pour : {}", user.getUsername());
+    }
+
+
+    public void deleteUserById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new CustomNotFoundException("Utilisateur non trouvé avec l'ID : " + id);
+        }
+        userRepository.deleteById(id);
+        log.info("Utilisateur supprimé (ID: {})", id);
+    }
+
+
+    private User getAuthenticatedUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomNotFoundException("Utilisateur non trouvé dans le contexte de sécurité"));
     }
 }

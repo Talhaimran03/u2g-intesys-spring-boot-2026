@@ -15,4 +15,6 @@ public interface UserMapper {
     User toEntity(RegisterRequestApiDTO userApiDTO);
 
     UserResponseApiDTO toResponseApiDTO(User user);
+
+    UserResponseApiDTO toDto(User save);
 }
