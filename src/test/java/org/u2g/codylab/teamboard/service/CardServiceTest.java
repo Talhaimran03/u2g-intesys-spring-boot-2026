@@ -11,7 +11,7 @@ import org.u2g.codylab.teamboard.dto.UpdateCardRequestApiDTO;
 import org.u2g.codylab.teamboard.entity.Card;
 import org.u2g.codylab.teamboard.entity.Column;
 import org.u2g.codylab.teamboard.entity.User;
-import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
+import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
 import org.u2g.codylab.teamboard.mapper.CardMapper;
 import org.u2g.codylab.teamboard.repository.CardRepository;
 import org.u2g.codylab.teamboard.repository.ColumnRepository;
@@ -73,7 +73,7 @@ class CardServiceTest {
         when(columnRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(CustomNotFoundException.class, () -> cardService.createCard(dto));
+        assertThrows(CustomIllegalArgumentException.class, () -> cardService.createCard(dto));
     }
 
     @Test
@@ -88,7 +88,7 @@ class CardServiceTest {
         when(userRepository.findById(2L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(CustomNotFoundException.class, () -> cardService.createCard(dto));
+        assertThrows(CustomIllegalArgumentException.class, () -> cardService.createCard(dto));
     }
 
     @Test
@@ -120,7 +120,7 @@ class CardServiceTest {
 
         // Act & Assert
         UpdateCardRequestApiDTO updateDto = new UpdateCardRequestApiDTO().columnId(2L).title("Title");
-        assertThrows(CustomNotFoundException.class, () -> cardService.updateCardById(1L, updateDto));
+        assertThrows(CustomIllegalArgumentException.class, () -> cardService.updateCardById(1L, updateDto));
     }
 
     @Test
@@ -159,6 +159,6 @@ class CardServiceTest {
         when(cardRepository.existsById(1L)).thenReturn(false);
 
         // Act & Assert
-        assertThrows(CustomNotFoundException.class, () -> cardService.deleteCardById(1L));
+        assertThrows(CustomIllegalArgumentException.class, () -> cardService.deleteCardById(1L));
     }
 }
