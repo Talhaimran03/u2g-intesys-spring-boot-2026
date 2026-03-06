@@ -30,9 +30,13 @@ public class ColumnService {
         this.columnMapper = columnMapper;
     }
 
-    public List<ColumnResponseApiDTO> getAll() {
+    public List<ColumnResponseApiDTO> getColumnsByProjectId(Long projectId) {
         log.info("Getting all columns");
-        return columnRepository.findAll().stream().map(columnMapper::toResponse).toList();
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomIllegalArgumentException("Project not found"));
+
+        List<Column> columns = columnRepository.findByProjectId(projectId);
+        return columns.stream().map(columnMapper::toResponse).toList();
     }
 
     public ColumnResponseApiDTO getById(Long id) {
@@ -47,7 +51,7 @@ public class ColumnService {
             throw new CustomIllegalArgumentException("Title is required");
         }
         Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new CustomNotFoundException("Project not found"));
+                .orElseThrow(() -> new CustomIllegalArgumentException("Project not found"));
         Column column = columnMapper.toEntity(request);
         column.setProject(project);
         Column saved = columnRepository.save(column);
@@ -58,7 +62,7 @@ public class ColumnService {
     public ColumnResponseApiDTO update(Long id, UpdateColumnRequestApiDTO request) {
         log.info("Updating column with id: {}", id);
         Column column = columnRepository.findById(id)
-                .orElseThrow(() -> new CustomNotFoundException("Column not found"));
+                .orElseThrow(() -> new CustomIllegalArgumentException("Column not found"));
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw new CustomIllegalArgumentException("Title is required");
         }
@@ -72,7 +76,7 @@ public class ColumnService {
     public void delete(Long id) {
         log.info("Deleting column with id: {}", id);
         if (!columnRepository.existsById(id)) {
-            throw new CustomNotFoundException("Column not found");
+            throw new CustomIllegalArgumentException("Column not found");
         }
         columnRepository.deleteById(id);
         log.info("Column deleted: {}", id);

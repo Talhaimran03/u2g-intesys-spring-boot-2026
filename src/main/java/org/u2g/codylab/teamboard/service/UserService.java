@@ -5,15 +5,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.u2g.codylab.teamboard.dto.LoginRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.RegisterRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.*;
 import org.u2g.codylab.teamboard.entity.User;
 import org.u2g.codylab.teamboard.exception.CustomConflictException;
+import org.u2g.codylab.teamboard.exception.CustomForbiddenException;
 import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
 import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.UserMapper;
 import org.u2g.codylab.teamboard.repository.UserRepository;
+import org.u2g.codylab.teamboard.util.AuthUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -76,14 +78,57 @@ public class UserService {
         return Optional.empty();
     }
 
+    public UserResponseApiDTO updatePersonalData(UpdatePersonalDataRequestApiDTO dto) {
+
+        User user = AuthUtil.getLoggedUser(userRepository);
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        userRepository.save(user);
+        return userMapper.toResponseApiDTO(user);
+    }
+
+    public UserResponseApiDTO updateUsername(UpdateUsernameRequestApiDTO dto) {
+        User user = AuthUtil.getLoggedUser(userRepository);
+        if (!user.getUsername().equals(dto.getUsername()) && userRepository.findByUsername(dto.getUsername()).isPresent()) {
+            throw new CustomConflictException("Username already taken");
+        }
+        user.setUsername(dto.getUsername());
+        userRepository.save(user);
+        return userMapper.toResponseApiDTO(user);
+    }
+
+    public void updatePassword(UpdatePasswordRequestApiDTO dto) {
+        User user = AuthUtil.getLoggedUser(userRepository);
+        if (!dto.getPassword().matches(PASSWORD_REGEX)) {
+            throw new CustomIllegalArgumentException("Password is too weak: must be at least 8 characters, contain upper and lower case, a number and a special character");
+        }
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userRepository.save(user);
+    }
+
     public boolean deleteUserById(Long id) {
         log.info("Deleting user with id: {}", id);
+        User user = AuthUtil.getLoggedUser(userRepository);
+
+        if (!user.getId().equals(id)) {
+            throw new CustomForbiddenException("User not authorized to delete this user");
+        }
+
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
             log.info("User deleted: {}", id);
             return true;
         }
         log.warn("User not found for delete: {}", id);
-        throw new CustomNotFoundException("User not found");
+        throw new CustomIllegalArgumentException("User not found");
+    }
+
+    public Me200ResponseApiDTO me() {
+        User user = AuthUtil.getLoggedUser(userRepository);
+        return new Me200ResponseApiDTO().username(user.getUsername());
+    }
+
+    public List<UserApiDTO> getAllUsers() {
+        return userRepository.findAll().stream().map(userMapper::toApiDTO).toList();
     }
 }

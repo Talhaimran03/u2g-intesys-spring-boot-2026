@@ -1,8 +1,6 @@
 package org.u2g.codylab.teamboard.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -80,7 +78,6 @@ class ProjectIntegrationTest {
                     .andExpect(status().isBadRequest());
         }
 
-        // TODO: fix the id problem
         @Test
         void shouldCreateProjectWithMembers() throws Exception {
             User user1 = new User()
@@ -125,7 +122,7 @@ class ProjectIntegrationTest {
             mockMvc.perform(post(BASE_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto)))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isBadRequest());
         }
     }
 

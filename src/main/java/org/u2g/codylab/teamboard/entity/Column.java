@@ -2,6 +2,7 @@ package org.u2g.codylab.teamboard.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,7 @@ public class Column {
     private Project project;
 
     @OneToMany(mappedBy = "column", cascade = CascadeType.ALL)
-    private java.util.List<Card> cards = new java.util.ArrayList<>();
+    private List<Card> cards = new ArrayList<>();
 
     public Long getId() {
         return id;

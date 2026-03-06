@@ -5,16 +5,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.u2g.codylab.teamboard.dto.ColumnResponseApiDTO;
-import org.u2g.codylab.teamboard.dto.CreateColumnRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.UpdateColumnRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.*;
 import org.u2g.codylab.teamboard.entity.Column;
 import org.u2g.codylab.teamboard.entity.Project;
-import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
+import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
 import org.u2g.codylab.teamboard.mapper.ColumnMapper;
 import org.u2g.codylab.teamboard.repository.ColumnRepository;
 import org.u2g.codylab.teamboard.repository.ProjectRepository;
-import java.util.List;
+
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +38,7 @@ class ColumnServiceTest {
         Project project = new Project();
         Column column = new Column();
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(columnMapper.toEntity(any())).thenReturn(column);
+        when(columnMapper.toEntity(any(CreateColumnRequestApiDTO.class))).thenReturn(column);
         when(columnRepository.save(any())).thenReturn(column);
         when(columnMapper.toResponse(any())).thenReturn(new ColumnResponseApiDTO());
 
@@ -57,7 +55,7 @@ class ColumnServiceTest {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(CustomNotFoundException.class, () -> columnService.create(dto));
+        assertThrows(CustomIllegalArgumentException.class, () -> columnService.create(dto));
     }
 
     @Test
@@ -83,7 +81,7 @@ class ColumnServiceTest {
         when(columnRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(CustomNotFoundException.class, () -> columnService.update(1L, dto));
+        assertThrows(CustomIllegalArgumentException.class, () -> columnService.update(1L, dto));
     }
 
     @Test
@@ -105,17 +103,6 @@ class ColumnServiceTest {
         when(columnRepository.existsById(1L)).thenReturn(false);
 
         // Act & Assert
-        assertThrows(CustomNotFoundException.class, () -> columnService.delete(1L));
-    }
-
-    @Test
-    void shouldGetAllColumnsSuccessfully() {
-
-        // Arrange
-        when(columnRepository.findAll()).thenReturn(List.of(new Column()));
-        when(columnMapper.toResponse(any())).thenReturn(new ColumnResponseApiDTO());
-
-        // Act & Assert
-        assertFalse(columnService.getAll().isEmpty());
+        assertThrows(CustomIllegalArgumentException.class, () -> columnService.delete(1L));
     }
 }

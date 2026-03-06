@@ -5,25 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.u2g.codylab.teamboard.dto.CreateProjectRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
-import org.u2g.codylab.teamboard.dto.UpdateProjectRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.*;
 import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.entity.User;
-import org.u2g.codylab.teamboard.exception.CustomAnauthorizedException;
 import org.u2g.codylab.teamboard.exception.CustomForbiddenException;
+import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
 import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
+import org.u2g.codylab.teamboard.mapper.ColumnMapper;
 import org.u2g.codylab.teamboard.mapper.ProjectMapper;
+import org.u2g.codylab.teamboard.mapper.UserMapper;
 import org.u2g.codylab.teamboard.repository.ProjectRepository;
 import org.u2g.codylab.teamboard.repository.UserRepository;
+import org.u2g.codylab.teamboard.util.AuthUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Transactional
@@ -33,22 +31,25 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ColumnMapper columnMapper;
+    private final UserMapper userMapper;
 
-    public ProjectService(ProjectMapper projectMapper, ProjectRepository projectRepository, UserRepository userRepository) {
+    public ProjectService(ProjectMapper projectMapper, ProjectRepository projectRepository, UserRepository userRepository, ColumnMapper columnMapper, UserMapper userMapper) {
         this.projectMapper = projectMapper;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.columnMapper = columnMapper;
+        this.userMapper = userMapper;
     }
 
     public Page<ProjectResponseApiDTO> getAllProjects(Pageable pageData) {
 
         log.info("Getting all projects: {}", pageData);
 
-        User loggedInUser = getLoggedUser();
+        User loggedInUser = AuthUtil.getLoggedUser(userRepository);
 
-        Page<Project> projectPage = projectRepository.findProjectByOwner(loggedInUser, pageData);
-
-        List<ProjectResponseApiDTO> dtos = projectPage.getContent().stream()
+        Page<Project> projects = projectRepository.findAllByOwnerOrMember(loggedInUser, loggedInUser.getId(), pageData);
+        List<ProjectResponseApiDTO> dtos = projects.getContent().stream()
             .map(project -> {
                 ProjectResponseApiDTO dto = projectMapper.toApiDTO(project);
                 long cardsCount = project.getColumns() == null ? 0L : (long) project.getColumns().size();
@@ -57,8 +58,7 @@ public class ProjectService {
             })
             .toList();
 
-        Page<ProjectResponseApiDTO> responseApiDTOS = new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
-
+        Page<ProjectResponseApiDTO> responseApiDTOS = new PageImpl<>(dtos, pageData, projects.getTotalElements());
         log.info("Retrieved {} projects", responseApiDTOS.getContent().size());
         return responseApiDTOS;
 
@@ -71,11 +71,11 @@ public class ProjectService {
         if (project.getMembers() != null && !project.getMembers().isEmpty()) {
             List<User> members = project.getMembers().stream()
                 .map(userId -> userRepository.findById(userId)
-                    .orElseThrow(() -> new CustomNotFoundException("Member not found with id: " + userId)))
+                    .orElseThrow(() -> new CustomIllegalArgumentException("Member not found with id: " + userId)))
                 .toList();
             projectEntity.setMembers(members);
         }
-        projectEntity.setOwner(getLoggedUser());
+        projectEntity.setOwner(AuthUtil.getLoggedUser(userRepository));
         projectEntity.setCreatedAt(LocalDateTime.now());
         projectEntity.setUpdatedAt(LocalDateTime.now());
 
@@ -90,9 +90,9 @@ public class ProjectService {
 
         log.info("Deleting project with id: {}", id);
 
-        User loggedInUser = getLoggedUser();
+        User loggedInUser = AuthUtil.getLoggedUser(userRepository);
 
-        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + id));
+        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + id));
 
         if (project.getOwner().getId().equals(loggedInUser.getId())) {
             projectRepository.deleteById(id);
@@ -117,11 +117,12 @@ public class ProjectService {
 
         log.info("Updating project with id: {}", id);
 
-        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + id));
+        Project project = projectRepository.findById(id).orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + id));
 
         project.setTitle(projectRequestApiDTO.getTitle());
         project.setDescription(projectRequestApiDTO.getDescription());
         project.setUpdatedAt(LocalDateTime.now());
+
         Project updatedProject = projectRepository.save(project);
         ProjectResponseApiDTO projectResponseApiDTO = projectMapper.toApiDTO(updatedProject);
 
@@ -129,14 +130,46 @@ public class ProjectService {
         return projectResponseApiDTO;
     }
 
-    private User getLoggedUser() {
-        log.info("Getting logged user");
+    public List<UserApiDTO> getProjectMembers(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new CustomNotFoundException("Project not found with id: " + projectId));
+        return project.getMembers().stream().map(userMapper::toApiDTO).toList();
+    }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = Objects.requireNonNull(authentication).getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomAnauthorizedException("User not found with username: " + username));
-        log.info("Retrieved user correctly");
+    public void addProjectMembers(Long projectId, List<Long> userIds) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + projectId));
 
-        return user;
+        userIds.forEach(userId -> {
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomIllegalArgumentException("User not found with id: " + userId));
+            if (!project.getMembers().contains(user)) {
+                project.getMembers().add(user);
+            } else {
+                throw new CustomIllegalArgumentException("User already exists in project");
+            }
+        });
+
+        projectRepository.save(project);
+    }
+
+    public void removeProjectMember(Long projectId, Long userId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + projectId));
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomIllegalArgumentException("User not found with id: " + userId));
+
+        if (project.getMembers().contains(user)) {
+            project.getMembers().remove(user);
+            projectRepository.save(project);
+        } else {
+            throw new CustomIllegalArgumentException("User not found in project");
+        }
+    }
+
+    public List<ColumnResponseApiDTO> getProjectColumns(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new CustomIllegalArgumentException("Project not found with id: " + projectId));
+        return project.getColumns().stream().map(columnMapper::toResponse).toList();
     }
 }
