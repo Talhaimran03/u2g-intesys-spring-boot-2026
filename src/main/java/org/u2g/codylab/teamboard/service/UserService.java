@@ -1,6 +1,7 @@
 package org.u2g.codylab.teamboard.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,11 +14,21 @@ import org.u2g.codylab.teamboard.exception.CustomIllegalArgumentException;
 import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.UserMapper;
 import org.u2g.codylab.teamboard.repository.UserRepository;
+import org.u2g.codylab.teamboard.util.AuthUtil;
+
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Transactional
 @Service
 public class UserService {
+
+    // Username validation: only letters, numbers, and underscores are allowed
+    private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]+$";
+
+    // Password validation: at least 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
+    private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -32,31 +43,35 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public void register(RegisterRequestApiDTO request) {
+    public ResponseEntity<Void> register(RegisterRequestApiDTO registerRequestApiDTO) {
 
-        log.info("Registering user: {}", request.getUsername());
-
-        if (!request.getUsername().matches("^[a-zA-Z0-9_-]+$")) {
-            throw new CustomIllegalArgumentException(
-                    "Username contains invalid characters: " + request.getUsername());
+        log.info("Registering user: {}", registerRequestApiDTO.getUsername());
+        String username = registerRequestApiDTO.getUsername();
+        String password = registerRequestApiDTO.getPassword();
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            throw new CustomIllegalArgumentException("Username and password are required");
         }
 
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new CustomConflictException(
-                    "Username already exists: " + request.getUsername());
+        username = username.trim();
+        if (!username.matches(USERNAME_REGEX)) {
+            throw new CustomIllegalArgumentException("Username must not contain special characters");
+        }
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new CustomConflictException("Username already exists");
         }
 
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        User user = userMapper.toEntity(request);
-
-        userRepository.save(user);
-
-        log.info("User successfully created: {}", request.getUsername());
+        if (!password.matches(PASSWORD_REGEX)) {
+            throw new CustomIllegalArgumentException("Password is too weak: must be at least 8 characters, contain upper and lower case, a number and a special character");
+        }
+        registerRequestApiDTO.setUsername(username);
+        registerRequestApiDTO.setPassword(passwordEncoder.encode(password));
+        User userEntity = userMapper.toEntity(registerRequestApiDTO);
+        userRepository.save(userEntity);
+        log.info("User registered: {}", username);
+        return ResponseEntity.ok().build();
     }
 
     public User login(LoginRequestApiDTO loginRequest) {
-
         log.info("Login attempt for user: {}", loginRequest.getUsername());
 
         User user = userRepository.findByUsername(loginRequest.getUsername())
@@ -125,7 +140,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        return userMapper.toApiDTO(user);
+        return userMapper.toResponseApiDTO(user);
     }
 
     public UserResponseApiDTO updateUsername(UpdateUsernameRequestApiDTO request) {
@@ -146,7 +161,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        return userMapper.toApiDTO(user);
+        return userMapper.toResponseApiDTO(user);
     }
 
     public void updatePassword(UpdatePasswordRequestApiDTO request) {
@@ -166,4 +181,12 @@ public class UserService {
         log.info("Password updated for user: {}", username);
     }
 
+    public Me200ResponseApiDTO me() {
+        User user = AuthUtil.getLoggedUser(userRepository);
+        return new Me200ResponseApiDTO().username(user.getUsername());
+    }
+
+    public List<UserApiDTO> getAllUsers() {
+        return userRepository.findAll().stream().map(userMapper::toApiDTO).toList();
+    }
 }

@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
+import org.u2g.codylab.teamboard.dto.ColumnApiDTO;
 import org.u2g.codylab.teamboard.dto.CreateProjectRequestApiDTO;
 import org.u2g.codylab.teamboard.dto.ProjectResponseApiDTO;
 import org.u2g.codylab.teamboard.entity.Project;

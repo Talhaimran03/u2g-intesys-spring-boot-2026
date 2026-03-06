@@ -5,19 +5,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.u2g.codylab.teamboard.dto.ColumnResponseApiDTO;
-import org.u2g.codylab.teamboard.dto.CreateColumnRequestApiDTO;
-import org.u2g.codylab.teamboard.dto.UpdateColumnRequestApiDTO;
+import org.u2g.codylab.teamboard.dto.*;
 import org.u2g.codylab.teamboard.entity.Column;
 import org.u2g.codylab.teamboard.entity.Project;
 import org.u2g.codylab.teamboard.exception.CustomNotFoundException;
 import org.u2g.codylab.teamboard.mapper.ColumnMapper;
 import org.u2g.codylab.teamboard.repository.ColumnRepository;
 import org.u2g.codylab.teamboard.repository.ProjectRepository;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -27,17 +23,12 @@ class ColumnServiceTest {
 
     @Mock
     private ColumnRepository columnRepository;
-
     @Mock
     private ProjectRepository projectRepository;
-
     @Mock
     private ColumnMapper columnMapper;
-
     @InjectMocks
     private ColumnService columnService;
-
-
 
     @Test
     void shouldGetAllColumnsSuccessfully() {
@@ -48,7 +39,7 @@ class ColumnServiceTest {
                 .thenReturn(new ColumnResponseApiDTO().id(1L).title("To Do"));
 
         // Act
-        List<ColumnResponseApiDTO> result = columnService.getAll();
+        List<ColumnResponseApiDTO> result = columnService.getColumnsByProjectId(61L);
 
         // Assert
         assertNotNull(result);
@@ -121,8 +112,6 @@ class ColumnServiceTest {
         verify(columnRepository, never()).save(any());
     }
 
-
-
     @Test
     void shouldUpdateColumnSuccessfully() {
         // Arrange
@@ -156,10 +145,9 @@ class ColumnServiceTest {
                 () -> columnService.update(99L, new UpdateColumnRequestApiDTO()));
     }
 
-
-
     @Test
     void shouldDeleteColumnSuccessfully() {
+
         // Arrange
         when(columnRepository.existsById(1L)).thenReturn(true);
 

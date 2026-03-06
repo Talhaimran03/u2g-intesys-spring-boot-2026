@@ -1,11 +1,14 @@
 package org.u2g.codylab.teamboard.controller;
 
+import org.hibernate.query.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.u2g.codylab.teamboard.api.UserApi;
 import org.u2g.codylab.teamboard.dto.*;
 import org.u2g.codylab.teamboard.service.UserService;
+
+import java.util.List;
 
 @RestController
 public class UserController implements UserApi {
@@ -60,4 +63,10 @@ public class UserController implements UserApi {
                 userService.updateUsername(request)
         );
     }
+
+//    @Override
+//    public ResponseEntity<Page<UserApiDTO>> getAllUsers() {
+//        return ResponseEntity.ok(userService.getAllUsers());
+//    }
+
 }

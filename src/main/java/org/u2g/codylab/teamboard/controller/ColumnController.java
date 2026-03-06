@@ -21,8 +21,8 @@ public class ColumnController implements ColumnApi {
     }
 
     @Override
-    public ResponseEntity<List<ColumnResponseApiDTO>> getAllColumns() {
-        List<ColumnResponseApiDTO> columns = columnService.getAll();
+    public ResponseEntity<List<ColumnResponseApiDTO>> getColumnsByProjectId(Long id) {
+        List<ColumnResponseApiDTO> columns = columnService.getColumnsByProjectId(id);
         return ResponseEntity.ok(columns);
     }
 
